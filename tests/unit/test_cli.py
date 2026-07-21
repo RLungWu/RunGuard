@@ -1,7 +1,7 @@
-from runguard.cli import main
+from runguard.cli.main import main
 
 
-def test_cli_main_output(capsys):
+def test_cli_main_output(capsys)->None:
     main()
     
     captured = capsys.readouterr()
