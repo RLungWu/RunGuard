@@ -1,0 +1,53 @@
+{
+    "format_version": 1,
+    "runs": [
+        {
+            "id": "baseline-seed-1",
+            "variant": "baseline",
+            "seed": 1,
+            "metrics": {
+                "val_f1": 0.8
+            }
+        },
+        {
+            "id": "candidate-seed-1",
+            "variant": "candidate",
+            "seed": 1,
+            "metrics": {
+                "val_f1": 0.82
+            }
+        },
+        {
+            "id": "baseline-seed-2",
+            "variant": "baseline",
+            "seed": 2,
+            "metrics": {
+                "val_f1": 0.81
+            }
+        },
+        {
+            "id": "candidate-seed-2",
+            "variant": "candidate",
+            "seed": 2,
+            "metrics": {
+                "val_f1": 0.805
+            }
+        },
+        {
+            "id": "baseline-seed-3",
+            "variant": "baseline",
+            "seed": 3,
+            "metrics": {
+                "val_f1": 0.79
+            }
+        },
+        {
+            "id": "candidate-seed-3",
+            "variant": "candidate",
+            "seed": 3,
+            "metrics": {
+                "val_f1": 0.8
+            }
+        }
+    ]
+}
