@@ -67,6 +67,19 @@ The milestone will likely require:
 
 These criteria should be reviewed after the M0 retrospective.
 
+## Proposed Model Decisions
+
+| Topic | Decision | Reason | Trade-off |
+|---|---|---|---|
+| Run identity | `run_id` is required and unique | Each run must be traceable and distinguishable from other runs | Invalid or duplicate run records cannot enter the canonical model |
+| Seed | A run may have no seed, but it cannot participate in paired comparison without one | Some source systems may not record seed information | The model can preserve the run, but comparison must handle it explicitly |
+| Metric storage | Store metrics as an ordered list of `MetricPoint` objects, normalized by ascending step | This preserves step information and provides deterministic ordering | Lookup is more verbose than a simple dictionary, and normalization may change input order |
+| Missing values | Preserve missing values explicitly | Missingness is part of the original experiment evidence | Downstream analysis must decide whether to reject, warn, or exclude the value |
+| Summary vs history | Store summary metrics and metric history separately | Their meanings may differ, so ingestion should not guess which one is authoritative | The model is more complex and requires a later selection policy |
+| Duplicate steps | Reject duplicate steps during validation | Silently overwriting a value could lose experiment evidence | Some imperfect source data will be rejected instead of automatically repaired |
+| Validation approach | Use Pydantic v2 models for validation and serialization | Reduce manual validation and serialization code, and provide structured validation errors | Adds a runtime dependency and may coerce input values unless strict validation is configured |
+| Extra fields | Reject unknown fields in canonical models; preserve source-specific data inside an explicit `source_metadata` field | Prevent typos and unsupported fields from being silently ignored | Backend-specific data must be intentionally placed under `source_metadata` |
+
 ## Risks
 
 ### Designing from imagined backend requirements
@@ -117,7 +130,10 @@ To be defined when the milestone becomes Draft or Active.
 
 ## Decisions Made During Implementation
 
-Not started.
+- Use Pydantic v2 models for validation and serialization.
+- Use strict validation for important numeric fields.
+- Forbid unknown fields in canonical models.
+- Preserve backend-specific data inside an explicit `source_metadata` field.
 
 ## Retrospective
 
