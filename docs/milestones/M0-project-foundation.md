@@ -241,13 +241,12 @@ Major architectural decisions should also receive an ADR.
 
 ## Retrospective
 
-Complete after the release.
-
-Suggested questions:
-
-* Which assumptions were incorrect?
-* Which tooling provided real value?
-* Which setup work was unnecessary?
-* Did the vertical slice expose missing architecture boundaries?
-* What should change before M1 begins?
-* Was the milestone small enough to complete without prolonged branches?
+- The temporary JSON fixture was sufficient to validate the first paired
+  comparison workflow, but it exposed the need for explicit schema validation
+  and a canonical model in M1.
+- pytest, Ruff, mypy, pre-commit, and GitHub Actions provided immediate value
+  by catching formatting, typing, and command-entry-point problems early.
+- The initial CLI should remain experimental because only seed pairing and
+  scalar metrics are currently supported.
+- M1 should define the canonical model and validation boundary before adding
+  tracking-system adapters or statistical analysis.
