@@ -22,19 +22,21 @@ def load_runs(filename: Path) -> ExperimentFixture:
     return cast(ExperimentFixture, data)
 
 
-def paired_differences(filename: Path) -> list[float]:
+def paired_differences(
+    filename: Path, baseline: str, candidate: str, metrics: str
+) -> list[float]:
     data = load_runs(filename)
     runs = data["runs"]
 
     baseline_by_seed = {
-        run["seed"]: run["metrics"]["val_f1"]
+        run["seed"]: run["metrics"][metrics]
         for run in runs
-        if run["variant"] == "baseline"
+        if run["variant"] == baseline
     }
     candidate_by_seed = {
-        run["seed"]: run["metrics"]["val_f1"]
+        run["seed"]: run["metrics"][metrics]
         for run in runs
-        if run["variant"] == "candidate"
+        if run["variant"] == candidate
     }
 
     if baseline_by_seed.keys() != candidate_by_seed.keys():
@@ -46,8 +48,10 @@ def paired_differences(filename: Path) -> list[float]:
     ]
 
 
-def mean_difference(filename: Path) -> float:
-    differences = paired_differences(filename)
+def mean_difference(
+    filename: Path, baseline: str, candidate: str, metrics: str
+) -> float:
+    differences = paired_differences(filename, baseline, candidate, metrics)
 
     if not differences:
         raise ValueError("No paired runs found")
