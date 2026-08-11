@@ -19,17 +19,17 @@ def test_load_runs() -> None:
 
 def test_paired_differences() -> None:
 
-    differences = paired_differences(MINIMAL_FIXTURE)
+    differences = paired_differences(MINIMAL_FIXTURE, "baseline", "candidate", "val_f1")
 
     assert differences == pytest.approx([0.02, -0.005, 0.01])
 
 
 def test_mean_difference() -> None:
-    mean = mean_difference(MINIMAL_FIXTURE)
+    mean = mean_difference(MINIMAL_FIXTURE, "baseline", "candidate", "val_f1")
 
     assert mean == pytest.approx(0.008333333333333333)
 
 
 def test_paired_differences_rejects_unpaired_seeds() -> None:
     with pytest.raises(ValueError, match="seeds do not match"):
-        paired_differences(UNPAIRED_FIXTURE)
+        paired_differences(UNPAIRED_FIXTURE, "baseline", "candidate", "val_f1")
