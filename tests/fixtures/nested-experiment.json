@@ -1,0 +1,59 @@
+{
+  "experiment": {
+    "id": "local-experiment"
+  },
+  "runs": [
+    {
+      "run_id": "baseline-seed-1",
+      "variant": "baseline",
+      "seed": 1,
+      "config": {
+        "learning_rate": 0.001
+      },
+      "history": {
+        "val_f1": [
+          {
+            "step": 2,
+            "value": 0.8
+          },
+          {
+            "step": 1,
+            "value": 0.75
+          }
+        ]
+      },
+      "summary": {
+        "val_f1": 0.8
+      },
+      "metadata": {
+        "backend": "nested-local"
+      }
+    },
+    {
+      "run_id": "candidate-seed-1",
+      "variant": "candidate",
+      "seed": 1,
+      "config": {
+        "learning_rate": 0.002
+      },
+      "history": {
+        "val_f1": [
+          {
+            "step": 1,
+            "value": 0.78
+          },
+          {
+            "step": 2,
+            "value": 0.82
+          }
+        ]
+      },
+      "summary": {
+        "val_f1": 0.82
+      },
+      "metadata": {
+        "backend": "nested-local"
+      }
+    }
+  ]
+}

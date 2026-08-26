@@ -72,6 +72,7 @@ def test_metric_series_round_trip() -> None:
 def test_run_can_be_created_with_nested_models() -> None:
     run = Run(
         run_id="candidate-seed-1",
+        variant="candidate",
         seed=1,
         config=RunConfig(values={"learning_rate": 0.001}),
         metrics=[
@@ -119,6 +120,7 @@ def test_run_rejects_unknown_fields() -> None:
 def test_run_round_trip() -> None:
     original = Run(
         run_id="candidate-seed-1",
+        variant="candidate",
         seed=1,
         config=RunConfig(values={"learning_rate": 0.001}),
         metrics=[
@@ -143,6 +145,7 @@ def test_run_round_trip() -> None:
 def make_run(run_id: str) -> Run:
     return Run(
         run_id=run_id,
+        variant="candidate",
         seed=1,
         config=RunConfig(values={"learning_rate": 0.001}),
         metrics=[

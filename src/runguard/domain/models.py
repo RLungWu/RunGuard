@@ -33,6 +33,7 @@ class RunConfig(CanonicalModel):
 
 class Run(CanonicalModel):
     run_id: str = Field(min_length=1)
+    variant: str | None = None
     seed: int | None = None
     config: RunConfig
     metrics: list[MetricSeries]
