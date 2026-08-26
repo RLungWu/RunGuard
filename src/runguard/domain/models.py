@@ -38,3 +38,17 @@ class Run(CanonicalModel):
     metrics: list[MetricSeries]
     summary_metrics: dict[str, float | None] = Field(default_factory=dict)
     source_metadata: dict[str, object] = Field(default_factory=dict)
+
+
+class ExperimentGroup(CanonicalModel):
+    group_id: str = Field(min_length=1)
+    runs: list[Run]
+
+    @model_validator(mode="after")
+    def validate_unique_run_ids(self) -> Self:
+        run_ids = [run.run_id for run in self.runs]
+
+        if len(run_ids) != len(set(run_ids)):
+            raise ValueError("Run IDs must be unique within an experiment group")
+
+        return self

@@ -1,7 +1,13 @@
 import pytest
 from pydantic import ValidationError
 
-from runguard.domain.models import MetricPoint, MetricSeries, Run, RunConfig
+from runguard.domain.models import (
+    ExperimentGroup,
+    MetricPoint,
+    MetricSeries,
+    Run,
+    RunConfig,
+)
 
 
 def test_metric_point_can_be_created() -> None:
@@ -130,5 +136,54 @@ def test_run_round_trip() -> None:
 
     payload = original.model_dump()
     restored = Run.model_validate(payload)
+
+    assert restored.model_dump() == original.model_dump()
+
+
+def make_run(run_id: str) -> Run:
+    return Run(
+        run_id=run_id,
+        seed=1,
+        config=RunConfig(values={"learning_rate": 0.001}),
+        metrics=[
+            MetricSeries(
+                name="val_f1",
+                points=[MetricPoint(step=1, value=0.75)],
+            )
+        ],
+    )
+
+
+def test_experiment_group_can_be_created_with_nested_runs() -> None:
+    group = ExperimentGroup(
+        group_id="experiment-1",
+        runs=[make_run("baseline-1"), make_run("candidate-1")],
+    )
+
+    assert group.group_id == "experiment-1"
+    assert [run.run_id for run in group.runs] == ["baseline-1", "candidate-1"]
+
+
+def test_experiment_group_rejects_duplicate_run_ids() -> None:
+    with pytest.raises(ValidationError, match="unique"):
+        ExperimentGroup(
+            group_id="experiment-1",
+            runs=[make_run("run-1"), make_run("run-1")],
+        )
+
+
+def test_experiment_group_rejects_empty_group_id() -> None:
+    with pytest.raises(ValidationError):
+        ExperimentGroup(group_id="", runs=[])
+
+
+def test_experiment_group_round_trip() -> None:
+    original = ExperimentGroup(
+        group_id="experiment-1",
+        runs=[make_run("baseline-1"), make_run("candidate-1")],
+    )
+
+    payload = original.model_dump()
+    restored = ExperimentGroup.model_validate(payload)
 
     assert restored.model_dump() == original.model_dump()
