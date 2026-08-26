@@ -1,0 +1,67 @@
+{
+  "group_id": "local-experiment",
+  "runs": [
+    {
+      "run_id": "baseline-seed-1",
+      "variant": "baseline",
+      "seed": 1,
+      "config": {
+        "values": {
+          "learning_rate": 0.001
+        }
+      },
+      "metrics": [
+        {
+          "name": "val_f1",
+          "points": [
+            {
+              "step": 1,
+              "value": 0.75
+            },
+            {
+              "step": 2,
+              "value": 0.8
+            }
+          ]
+        }
+      ],
+      "summary_metrics": {
+        "val_f1": 0.8
+      },
+      "source_metadata": {
+        "backend": "canonical-local"
+      }
+    },
+    {
+      "run_id": "candidate-seed-1",
+      "variant": "candidate",
+      "seed": 1,
+      "config": {
+        "values": {
+          "learning_rate": 0.002
+        }
+      },
+      "metrics": [
+        {
+          "name": "val_f1",
+          "points": [
+            {
+              "step": 1,
+              "value": 0.78
+            },
+            {
+              "step": 2,
+              "value": 0.82
+            }
+          ]
+        }
+      ],
+      "summary_metrics": {
+        "val_f1": 0.82
+      },
+      "source_metadata": {
+        "backend": "canonical-local"
+      }
+    }
+  ]
+}

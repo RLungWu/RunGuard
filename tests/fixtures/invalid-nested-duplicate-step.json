@@ -1,0 +1,22 @@
+{
+  "experiment": {
+    "id": "invalid-experiment"
+  },
+  "runs": [
+    {
+      "run_id": "run-1",
+      "history": {
+        "val_f1": [
+          {
+            "step": 1,
+            "value": 0.7
+          },
+          {
+            "step": 1,
+            "value": 0.8
+          }
+        ]
+      }
+    }
+  ]
+}
