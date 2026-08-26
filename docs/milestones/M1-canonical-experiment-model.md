@@ -74,6 +74,7 @@ These criteria should be reviewed after the M0 retrospective.
 | Run identity | `run_id` is required on `Run` and unique within an `ExperimentGroup` | Each run must be traceable, and runs must not be duplicated within one experiment group | Uniqueness requires group-level validation and duplicate records are rejected |
 | Experiment grouping | `ExperimentGroup` contains a required `group_id` and a list of `Run` objects | Group-level validation needs a boundary where relationships between runs can be checked | A run can only be checked for duplicate identity within a group, not in isolation |
 | Run variant | Preserve an optional `variant` on `Run` | M0 and comparison workflows use labels such as `baseline` and `candidate` | Runs from sources without a variant remain representable but need an explicit analysis eligibility decision |
+| Artifact references | Preserve an optional list of `ArtifactReference` objects on `Run` | Analysis results may need to identify the checkpoint or artifact used by a run without storing the artifact itself | References can become stale, and RunGuard does not verify or download the referenced artifact |
 | Seed | A run may have no seed, but it cannot participate in paired comparison without one | Some source systems may not record seed information | The model can preserve the run, but comparison must handle it explicitly |
 | Metric storage | Store metrics as an ordered list of `MetricPoint` objects, normalized by ascending step | This preserves step information and provides deterministic ordering | Lookup is more verbose than a simple dictionary, and normalization may change input order |
 | Missing values | Preserve missing values explicitly | Missingness is part of the original experiment evidence | Downstream analysis must decide whether to reject, warn, or exclude the value |
@@ -138,6 +139,7 @@ To be defined when the milestone becomes Draft or Active.
 - Preserve backend-specific data inside an explicit `source_metadata` field.
 - Validate `run_id` uniqueness at the `ExperimentGroup` level.
 - Preserve comparison-relevant `variant` information on `Run` when a source provides it.
+- Store artifact locations and optional digests as references, without managing artifact storage.
 
 ## Retrospective
 

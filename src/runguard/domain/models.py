@@ -27,6 +27,12 @@ class MetricSeries(CanonicalModel):
         return self
 
 
+class ArtifactReference(CanonicalModel):
+    uri: str = Field(min_length=1)
+    artifact_type: str | None = None
+    digest: str | None = None
+
+
 class RunConfig(CanonicalModel):
     values: dict[str, object]
 
@@ -37,6 +43,7 @@ class Run(CanonicalModel):
     seed: int | None = None
     config: RunConfig
     metrics: list[MetricSeries]
+    artifacts: list[ArtifactReference] = Field(default_factory=list)
     summary_metrics: dict[str, float | None] = Field(default_factory=dict)
     source_metadata: dict[str, object] = Field(default_factory=dict)
 

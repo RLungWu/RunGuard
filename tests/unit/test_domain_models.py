@@ -2,6 +2,7 @@ import pytest
 from pydantic import ValidationError
 
 from runguard.domain.models import (
+    ArtifactReference,
     ExperimentGroup,
     MetricPoint,
     MetricSeries,
@@ -69,6 +70,28 @@ def test_metric_series_round_trip() -> None:
     assert restored.model_dump() == original.model_dump()
 
 
+def test_artifact_reference_can_be_created() -> None:
+    artifact = ArtifactReference(
+        uri="s3://bucket/model.pt",
+        artifact_type="model_checkpoint",
+        digest="sha256:abc123",
+    )
+
+    assert artifact.uri == "s3://bucket/model.pt"
+    assert artifact.artifact_type == "model_checkpoint"
+    assert artifact.digest == "sha256:abc123"
+
+
+def test_artifact_reference_rejects_empty_uri() -> None:
+    with pytest.raises(ValidationError):
+        ArtifactReference(uri="")
+
+
+def test_artifact_reference_rejects_unknown_fields() -> None:
+    with pytest.raises(ValidationError):
+        ArtifactReference(uri="file:///tmp/model.pt", unexpected="not allowed")
+
+
 def test_run_can_be_created_with_nested_models() -> None:
     run = Run(
         run_id="candidate-seed-1",
@@ -81,6 +104,12 @@ def test_run_can_be_created_with_nested_models() -> None:
                 points=[MetricPoint(step=1, value=0.75)],
             )
         ],
+        artifacts=[
+            ArtifactReference(
+                uri="s3://bucket/model.pt",
+                artifact_type="model_checkpoint",
+            )
+        ],
         summary_metrics={"val_f1": 0.75},
         source_metadata={"backend": "local-json"},
     )
@@ -88,6 +117,7 @@ def test_run_can_be_created_with_nested_models() -> None:
     assert run.run_id == "candidate-seed-1"
     assert run.config.values["learning_rate"] == 0.001
     assert run.metrics[0].name == "val_f1"
+    assert run.artifacts[0].uri == "s3://bucket/model.pt"
 
 
 def test_run_allows_missing_seed_and_optional_metadata() -> None:
@@ -100,6 +130,7 @@ def test_run_allows_missing_seed_and_optional_metadata() -> None:
     assert run.seed is None
     assert run.summary_metrics == {}
     assert run.source_metadata == {}
+    assert run.artifacts == []
 
 
 def test_run_rejects_empty_run_id() -> None:
@@ -132,6 +163,7 @@ def test_run_round_trip() -> None:
                 ],
             )
         ],
+        artifacts=[ArtifactReference(uri="s3://bucket/model.pt")],
         summary_metrics={"val_f1": 0.8},
         source_metadata={"backend": "local-json"},
     )
