@@ -70,6 +70,25 @@ def test_metric_series_round_trip() -> None:
     assert restored.model_dump() == original.model_dump()
 
 
+def test_metric_series_serialization_is_stable_after_order_normalization() -> None:
+    unordered = MetricSeries(
+        name="val_f1",
+        points=[
+            MetricPoint(step=2, value=0.8),
+            MetricPoint(step=1, value=0.7),
+        ],
+    )
+    ordered = MetricSeries(
+        name="val_f1",
+        points=[
+            MetricPoint(step=1, value=0.7),
+            MetricPoint(step=2, value=0.8),
+        ],
+    )
+
+    assert unordered.model_dump_json() == ordered.model_dump_json()
+
+
 def test_artifact_reference_can_be_created() -> None:
     artifact = ArtifactReference(
         uri="s3://bucket/model.pt",
@@ -172,6 +191,23 @@ def test_run_round_trip() -> None:
     restored = Run.model_validate(payload)
 
     assert restored.model_dump() == original.model_dump()
+
+
+def test_run_preserves_conflicting_summary_and_history_values() -> None:
+    run = Run(
+        run_id="run-1",
+        config=RunConfig(values={}),
+        metrics=[
+            MetricSeries(
+                name="val_f1",
+                points=[MetricPoint(step=1, value=0.8)],
+            )
+        ],
+        summary_metrics={"val_f1": 0.9},
+    )
+
+    assert run.metrics[0].points[-1].value == 0.8
+    assert run.summary_metrics["val_f1"] == 0.9
 
 
 def make_run(run_id: str) -> Run:
