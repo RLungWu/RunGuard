@@ -1,4 +1,4 @@
-from pydantic import BaseModel, ConfigDict, model_validator
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 from typing_extensions import Self
 
 
@@ -12,7 +12,7 @@ class MetricPoint(CanonicalModel):
 
 
 class MetricSeries(CanonicalModel):
-    name: str
+    name: str = Field(min_length=1)
     points: list[MetricPoint]
 
     @model_validator(mode="after")
@@ -25,3 +25,16 @@ class MetricSeries(CanonicalModel):
         self.points.sort(key=lambda point: point.step)
 
         return self
+
+
+class RunConfig(CanonicalModel):
+    values: dict[str, object]
+
+
+class Run(CanonicalModel):
+    run_id: str = Field(min_length=1)
+    seed: int | None = None
+    config: RunConfig
+    metrics: list[MetricSeries]
+    summary_metrics: dict[str, float | None] = Field(default_factory=dict)
+    source_metadata: dict[str, object] = Field(default_factory=dict)
