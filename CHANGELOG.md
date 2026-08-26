@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.0.2] - 2026-08-26
+
+### Added
+
+- Pydantic-based canonical experiment models.
+- Metric point and series validation with deterministic step ordering.
+- Canonical run, experiment group, and artifact reference models.
+- Local JSON adapters for M0 flat, nested history, and canonical formats.
+- Valid and invalid canonical-model fixtures and round-trip tests.
+
+### Known Limitations
+
+- Timestamps and public schema versioning are deferred.
+- Remote tracking-system adapters are not included.
+- Statistical comparison and release policies remain outside M1.
+
 ## [0.0.1] - 2026-08-11
 
 ### Added

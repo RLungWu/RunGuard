@@ -20,7 +20,7 @@ That representation is not expected to support real tracking systems or become a
 
 The milestone should begin only after the M0 retrospective identifies which data structures were required by the comparison workflow.
 
-## Preliminary Scope
+## Scope
 
 The milestone is expected to explore:
 
@@ -29,17 +29,16 @@ The milestone is expected to explore:
 * configuration values;
 * metric points and metric series;
 * metric step semantics;
-* timestamps;
 * seed representation;
-* source references;
+* artifact and source references;
 * serialization;
 * schema validation;
 * local JSON ingestion;
 * valid and invalid experiment fixtures.
 
-The exact types and field requirements remain undecided.
+The M1 model decisions are recorded below; timestamp semantics and public schema versioning are explicitly deferred.
 
-## Preliminary Non-Goals
+## Non-Goals
 
 M1 is not expected to include:
 
@@ -54,18 +53,16 @@ M1 is not expected to include:
 * generalized data lineage;
 * stable public compatibility guarantees.
 
-## Preliminary Success Criteria
+## Success Criteria
 
 The milestone will likely require:
 
-* multiple local input formats converting into the same canonical representation;
-* explicit validation errors for malformed input;
-* deterministic serialization;
+* three local input formats converting into the same canonical representation;
+* explicit validation errors for malformed input and duplicate run identities;
+* deterministic model serialization with normalized metric point ordering;
 * preserved metric step ordering;
 * no import of tracking-platform SDKs in the domain layer;
-* tests for missing values, duplicated steps, and conflicting metadata.
-
-These criteria should be reviewed after the M0 retrospective.
+* tests for missing values, duplicated steps, and conflicting summary/history values.
 
 ## Proposed Model Decisions
 
@@ -101,35 +98,41 @@ Excessive optional fields may move validation problems into later analysis stage
 
 Requirements based on one project may reject valid experiments from other workflows.
 
-## Open Questions
+## Resolved and Deferred Questions
 
-* What information is required for a run to participate in comparison?
-* Should metrics be stored as raw points, tabular histories, or both?
-* How should duplicated metric steps be handled?
-* Should summary metrics be stored separately from metric history?
-* How should seed identity be represented?
-* Which metadata belongs in the canonical model versus source extensions?
-* Should validation use Pydantic, dataclasses, or another approach?
-* How should schema versions be represented?
-* Should normalized snapshots preserve unknown source fields?
+Resolved in M1:
 
-## Planned Issues
+* Metric history is stored as ordered `MetricPoint` objects.
+* Duplicate metric steps are rejected.
+* Summary metrics and metric history are stored separately.
+* `RunId` is represented as a validated non-empty string; a dedicated wrapper type is not needed yet.
+* Seed is optional; comparison eligibility is decided by a later analysis layer.
+* Canonical validation uses Pydantic v2 with strict fields and forbidden unknown fields.
+* Backend-specific values are kept in explicit `source_metadata` or `ArtifactReference` fields.
 
-Issues should be created after M0 is complete.
+Deferred beyond M1:
 
-Expected planning areas include:
+* Timestamp semantics and normalization across tracking systems.
+* A versioned public snapshot format and automatic schema migration.
 
-* domain requirements from the M0 workflow;
-* canonical model proposal;
-* validation strategy;
-* serialization format;
-* fixture design;
-* local adapter contract;
-* domain-layer tests.
+## Completed Issues
+
+* Define the canonical model and validation strategy.
+* Implement metric, run, experiment group, and artifact reference models.
+* Implement the local JSON adapter for three input formats.
+* Add valid and invalid fixtures and serialization tests.
 
 ## Release Gate
 
-To be defined when the milestone becomes Draft or Active.
+M1 is ready to complete when:
+
+* all success criteria are satisfied;
+* `pytest`, `ruff check .`, `mypy src`, and pre-commit checks pass;
+* the domain layer imports no tracking-platform SDK;
+* known limitations and deferred decisions are documented;
+* `CHANGELOG.md` contains the `v0.0.2` entry;
+* the retrospective is complete;
+* the `v0.0.2` release is tagged after the changes are merged to `main`.
 
 ## Decisions Made During Implementation
 
@@ -143,4 +146,7 @@ To be defined when the milestone becomes Draft or Active.
 
 ## Retrospective
 
-Not started.
+* Pydantic reduced manual validation and serialization code while keeping errors explicit at the source boundary.
+* Separating source models from canonical models allowed M0, nested, and canonical JSON formats to converge without coupling the domain layer to a backend.
+* Preserving summary metrics separately from history avoids making an ingestion-time decision when the two values disagree.
+* Timestamps and public schema versioning were deferred because M1 did not yet have stable cross-backend semantics or a compatibility requirement.
