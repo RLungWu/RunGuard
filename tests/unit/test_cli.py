@@ -1,9 +1,12 @@
 from pathlib import Path
 
+import pytest
+
 from runguard.cli.main import main
 
 FIXTURES_DIR = Path(__file__).parents[1] / "fixtures"
 CANONICAL_FIXTURE = FIXTURES_DIR / "canonical-experiment.json"
+UNPAIRED_FIXTURE = FIXTURES_DIR / "unpaired-comparison.json"
 
 
 def test_cli_main_output(capsys) -> None:
@@ -35,3 +38,32 @@ def test_cli_main_output(capsys) -> None:
         "Median paired difference: +0.020000\n"
         "Positive pairs: 1/1 (100.00%)\n"
     )
+
+
+def test_cli_reports_unpaired_seed_error(capsys) -> None:
+    with pytest.raises(SystemExit) as error:
+        main(
+            [
+                "compare",
+                "--input",
+                str(UNPAIRED_FIXTURE),
+                "--input-format",
+                "m0",
+                "--group-id",
+                "unpaired-experiment",
+                "--baseline",
+                "baseline",
+                "--candidate",
+                "candidate",
+                "--metric",
+                "val_f1",
+                "--pair-by",
+                "seed",
+            ]
+        )
+
+    captured = capsys.readouterr()
+
+    assert error.value.code == 2
+    assert captured.out == ""
+    assert "error: Unpaired seeds; missing candidate seeds: [2]" in captured.err
