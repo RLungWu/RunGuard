@@ -1,0 +1,29 @@
+{
+  "group_id": "lower-is-better-experiment",
+  "runs": [
+    {
+      "run_id": "baseline-seed-1",
+      "variant": "baseline",
+      "seed": 1,
+      "config": {
+        "values": {}
+      },
+      "metrics": [],
+      "summary_metrics": {
+        "val_loss": 0.2
+      }
+    },
+    {
+      "run_id": "candidate-seed-1",
+      "variant": "candidate",
+      "seed": 1,
+      "config": {
+        "values": {}
+      },
+      "metrics": [],
+      "summary_metrics": {
+        "val_loss": 0.15
+      }
+    }
+  ]
+}
