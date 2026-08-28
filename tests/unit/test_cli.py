@@ -3,8 +3,7 @@ from pathlib import Path
 from runguard.cli.main import main
 
 FIXTURES_DIR = Path(__file__).parents[1] / "fixtures"
-MINIMAL_FIXTURE = FIXTURES_DIR / "minimal-comparison.json"
-UNPAIRED_FIXTURE = FIXTURES_DIR / "unpaired-comparison.json"
+CANONICAL_FIXTURE = FIXTURES_DIR / "canonical-experiment.json"
 
 
 def test_cli_main_output(capsys) -> None:
@@ -12,7 +11,7 @@ def test_cli_main_output(capsys) -> None:
         [
             "compare",
             "--input",
-            str(MINIMAL_FIXTURE),
+            str(CANONICAL_FIXTURE),
             "--baseline",
             "baseline",
             "--candidate",
@@ -29,6 +28,10 @@ def test_cli_main_output(capsys) -> None:
     assert captured.out == (
         "Comparison: baseline → candidate\n"
         "Metric: val_f1\n"
-        "Paired runs: 3\n"
-        "Mean paired difference: +0.008333\n"
+        "Value source: summary\n"
+        "Direction: higher-is-better\n"
+        "Paired runs: 1\n"
+        "Mean paired difference: +0.020000\n"
+        "Median paired difference: +0.020000\n"
+        "Positive pairs: 1/1 (100.00%)\n"
     )
