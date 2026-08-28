@@ -84,6 +84,16 @@ def test_compare_group_rejects_unpaired_seeds() -> None:
         compare_group(group, "baseline", "candidate", "val_f1")
 
 
+def test_compare_group_rejects_run_without_seed() -> None:
+    group = _group(
+        _run("baseline-without-seed", "baseline", None, 0.8),
+        _run("candidate-1", "candidate", 1, 0.82),
+    )
+
+    with pytest.raises(ComparisonError, match="must have a seed"):
+        compare_group(group, "baseline", "candidate", "val_f1")
+
+
 def test_compare_group_rejects_missing_summary_metric() -> None:
     group = _group(
         _run("baseline-1", "baseline", 1, 0.8),
@@ -122,7 +132,7 @@ def _group(*runs: Run) -> ExperimentGroup:
 def _run(
     run_id: str,
     variant: str,
-    seed: int,
+    seed: int | None,
     value: float | None,
     *,
     summary_metrics: dict[str, float | None] | None = None,
