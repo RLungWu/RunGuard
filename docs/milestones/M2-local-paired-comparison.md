@@ -2,7 +2,7 @@
 
 ## Status
 
-Active
+Completed
 
 ## Goal
 
@@ -217,4 +217,16 @@ CLI output remain explicit follow-up decisions rather than implicit behavior.
 
 ## Retrospective
 
-Not started.
+* Moving comparison behind the canonical model kept pairing and aggregation
+  independent from the three supported local input formats.
+* Pairing by seed and rejecting incomplete or duplicate keys protected the
+  denominator and made invalid evidence visible instead of silently dropping
+  runs.
+* Keeping raw and direction-aware differences in the structured result made
+  lower-is-better metrics interpretable without losing the observed values.
+* Synthetic multi-seed scenarios exposed the difference between observing one
+  positive pair and having evidence across the full paired set.
+
+Best/final checkpoint selection, incomplete-pair analysis, and machine-
+readable CLI output remain intentionally deferred to later milestones or
+explicit policy decisions.

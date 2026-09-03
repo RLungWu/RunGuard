@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.0.3] - 2026-09-03
+
+### Added
+
+- Canonical local paired comparison by seed for baseline and candidate runs.
+- Structured comparison results with mean, median, positive-pair rate, and
+  source run provenance.
+- Higher-is-better and lower-is-better metric direction support.
+- Human-readable CLI output for valid comparisons and explicit invalid-input
+  errors.
+- Synthetic multi-seed scenarios covering stable, mixed, single-pair,
+  lower-is-better, and invalid-pairing cases.
+
+### Known Limitations
+
+- Summary values are source-reported; best- and final-checkpoint selection are
+  not implemented.
+- Confidence intervals, outlier analysis, incomplete-pair policies, and
+  remote tracking-system ingestion remain future work.
+
 ## [0.0.2] - 2026-08-26
 
 ### Added

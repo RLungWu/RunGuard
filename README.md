@@ -283,18 +283,15 @@ mypy src
 
 ## Project Status
 
-Current milestone: **M0 — Project Foundation**
+Current milestone: **M3 — Statistical Evidence Engine**
 
-The immediate target is `v0.0.1`, which will include:
+The immediate target is `v0.0.4`, which will include:
 
-* an installable Python package;
-* CLI scaffolding;
-* automated tests;
-* linting and type checking;
-* continuous integration;
-* an initial canonical run schema;
-* local experiment fixtures;
-* one end-to-end paired comparison flow.
+* paired bootstrap confidence intervals;
+* effect size and positive-seed rate;
+* outlier influence and leave-one-pair-out sensitivity analysis;
+* best-checkpoint and final-checkpoint policies;
+* structured evidence objects.
 
 See [ROADMAP.md](ROADMAP.md) for the complete development plan.
 
