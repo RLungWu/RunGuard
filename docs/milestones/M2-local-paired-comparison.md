@@ -189,7 +189,31 @@ M2 is ready to complete when:
 
 ## Decisions Made During Implementation
 
-To be updated as implementation details are finalized.
+The implementation confirmed the following decisions:
+
+* Comparison reads `summary_metrics` only. It does not infer a best or final
+  checkpoint from metric history, and it does not silently fall back to
+  history when the summary value is missing.
+* Pairing is fail-closed. Missing seeds, missing candidate pairs, missing
+  metric values, and duplicate `(variant, seed)` keys produce explicit
+  errors instead of reducing the comparison denominator or overwriting a
+  record.
+* The result preserves both `candidate - baseline` and a direction-aware
+  improvement value. This keeps the observed data inspectable while making a
+  positive improvement mean the same thing for higher-is-better and
+  lower-is-better metrics.
+* M2 does not add a boolean `stable` label. A single positive pair is visible
+  through the pair records and aggregate counts, but the tool does not make a
+  stronger stability claim than the observed evidence supports.
+* Pair results are sorted by seed and include both source run IDs. This makes
+  output deterministic and keeps aggregate values traceable to their inputs.
+* Floating-point tolerances such as `pytest.approx` are test concerns only;
+  production comparison values remain ordinary numeric values with no hidden
+  tolerance policy.
+
+These choices keep M2 focused on reproducible local paired comparison. Best /
+final checkpoint policies, incomplete-pair analysis, and machine-readable
+CLI output remain explicit follow-up decisions rather than implicit behavior.
 
 ## Retrospective
 
