@@ -9,6 +9,8 @@ from runguard.sources.local_json import load_local_json
 
 FIXTURES_DIR = Path(__file__).parents[1] / "fixtures"
 CANONICAL_FIXTURE = FIXTURES_DIR / "canonical-experiment.json"
+SINGLE_SEED_IMPROVEMENT_FIXTURE = FIXTURES_DIR / "single-seed-improvement.json"
+STABLE_IMPROVEMENT_FIXTURE = FIXTURES_DIR / "stable-improvement.json"
 
 
 def test_compare_group_uses_summary_metrics_and_preserves_provenance() -> None:
@@ -39,6 +41,29 @@ def test_compare_group_orders_pairs_by_seed() -> None:
     assert [pair.seed for pair in result.pairs] == [1, 2]
     assert result.mean_difference == pytest.approx(0.01)
     assert result.positive_pair_count == 1
+
+
+def test_compare_group_aggregates_stable_multi_seed_improvement() -> None:
+    group = load_local_json(STABLE_IMPROVEMENT_FIXTURE, "canonical")
+
+    result = compare_group(group, "baseline", "candidate", "val_f1")
+
+    assert [pair.seed for pair in result.pairs] == [1, 2, 3]
+    assert result.mean_difference == pytest.approx(0.02)
+    assert result.median_difference == pytest.approx(0.02)
+    assert result.positive_pair_count == 3
+    assert result.positive_pair_rate == pytest.approx(1.0)
+
+
+def test_compare_group_does_not_overstate_single_seed_improvement() -> None:
+    group = load_local_json(SINGLE_SEED_IMPROVEMENT_FIXTURE, "canonical")
+
+    result = compare_group(group, "baseline", "candidate", "val_f1")
+
+    assert result.mean_difference == pytest.approx(0.0033333333333332993)
+    assert result.median_difference == pytest.approx(0.0)
+    assert result.positive_pair_count == 1
+    assert result.positive_pair_rate == pytest.approx(1 / 3)
 
 
 def test_compare_group_normalizes_lower_is_better_improvement() -> None:
