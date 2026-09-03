@@ -1,0 +1,53 @@
+{
+  "group_id": "single-seed-improvement",
+  "runs": [
+    {
+      "run_id": "baseline-seed-1",
+      "variant": "baseline",
+      "seed": 1,
+      "config": {"values": {}},
+      "metrics": [],
+      "summary_metrics": {"val_f1": 0.80}
+    },
+    {
+      "run_id": "candidate-seed-1",
+      "variant": "candidate",
+      "seed": 1,
+      "config": {"values": {}},
+      "metrics": [],
+      "summary_metrics": {"val_f1": 0.82}
+    },
+    {
+      "run_id": "baseline-seed-2",
+      "variant": "baseline",
+      "seed": 2,
+      "config": {"values": {}},
+      "metrics": [],
+      "summary_metrics": {"val_f1": 0.81}
+    },
+    {
+      "run_id": "candidate-seed-2",
+      "variant": "candidate",
+      "seed": 2,
+      "config": {"values": {}},
+      "metrics": [],
+      "summary_metrics": {"val_f1": 0.80}
+    },
+    {
+      "run_id": "baseline-seed-3",
+      "variant": "baseline",
+      "seed": 3,
+      "config": {"values": {}},
+      "metrics": [],
+      "summary_metrics": {"val_f1": 0.79}
+    },
+    {
+      "run_id": "candidate-seed-3",
+      "variant": "candidate",
+      "seed": 3,
+      "config": {"values": {}},
+      "metrics": [],
+      "summary_metrics": {"val_f1": 0.79}
+    }
+  ]
+}
