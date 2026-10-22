@@ -2,11 +2,12 @@
 
 ## Status
 
-Draft
+Active
 
-The statistical direction is agreed and the implementation boundary is being
-prepared. The status will become **Active** when the first implementation slice
-starts.
+Implementation has started. The bootstrap reference path, paired effect size,
+positive-pair evidence, and the first structured evidence object are
+implemented. Sensitivity, checkpoint, multi-metric, benchmark, and CLI work
+remain open.
 
 ## Goal
 
@@ -340,6 +341,19 @@ The following decisions were agreed during M3 planning:
   silently dropped.
 * Evidence objects must contain source provenance, statistical parameters,
   assumptions, and limitations sufficient for reproduction.
+* `bootstrap_mean` resamples values in the order the caller supplies them.
+  The evidence builder supplies direction-aware improvements ordered by seed,
+  so the seed order (not value order) is part of the reproducibility contract.
+* The percentile bounds are derived from the configured confidence level as
+  `(1 - confidence_level) / 2` and `1 - (1 - confidence_level) / 2`.
+* When every paired improvement is identical, the sample standard deviation is
+  zero and `d_z` is reported as insufficient evidence (`zero-variance`) rather
+  than an infinite or undefined number.
+* `build_paired_evidence` recalculates mean, median, positive-pair count, effect
+  size, and bootstrap interval from the stored pairs instead of trusting the
+  comparison aggregates, and rejects empty or duplicate-seed pairs.
+* Bootstrap parameters are validated even when fewer than two pairs make the
+  interval insufficient evidence, so invalid configuration is never hidden.
 
 ## Retrospective
 

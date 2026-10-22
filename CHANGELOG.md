@@ -1,5 +1,22 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+- Paired Cohen's `d_z` effect size using the `n - 1` sample standard deviation.
+- Structured `PairedEvidence` objects with seed-ordered pairs, positive-pair
+  evidence, effect size, bootstrap interval, parameters, and limitations.
+- Explicit insufficient-evidence records for fewer than two pairs and for
+  zero-variance effect sizes.
+
+### Fixed
+
+- Bootstrap intervals now honour the configured confidence level instead of
+  always using the 95% bounds.
+- Bootstrap resampling preserves the caller's seed order instead of sorting
+  values, aligning reproducibility with the M3 contract.
+
 ## [0.0.3] - 2026-09-03
 
 ### Added
