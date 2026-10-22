@@ -1,3 +1,6 @@
+import random
+import statistics
+
 import pytest
 from pydantic import ValidationError
 
@@ -82,3 +85,68 @@ def test_bootstrap_mean_is_reproducible_and_matches_reference() -> None:
     assert result.sample_size == 3
     assert result.config.random_seed == 7
     assert result.config.resamples == 20
+
+
+def _reference_interval(
+    values: list[float],
+    *,
+    confidence_level: float,
+    resamples: int,
+    random_seed: int,
+) -> tuple[float, float]:
+    """Independent reference using the stdlib inclusive quantile method."""
+    rng = random.Random(random_seed)
+    means = [
+        sum(sample) / len(sample)
+        for sample in (rng.choices(values, k=len(values)) for _ in range(resamples))
+    ]
+    tail_cuts = round(2 / (1 - confidence_level))
+    cuts = statistics.quantiles(means, n=tail_cuts, method="inclusive")
+    return cuts[0], cuts[-1]
+
+
+@pytest.mark.parametrize("confidence_level", [0.8, 0.9, 0.95])
+def test_bootstrap_mean_applies_confidence_level(confidence_level: float) -> None:
+    values = [0.012, -0.004, 0.021, 0.008, 0.017, 0.003]
+
+    result = bootstrap_mean(
+        values,
+        confidence_level=confidence_level,
+        resamples=500,
+        random_seed=11,
+    )
+    lower, upper = _reference_interval(
+        values,
+        confidence_level=confidence_level,
+        resamples=500,
+        random_seed=11,
+    )
+
+    assert result.lower == pytest.approx(lower, abs=1e-12)
+    assert result.upper == pytest.approx(upper, abs=1e-12)
+    assert result.config.confidence_level == confidence_level
+
+
+def test_bootstrap_mean_narrower_confidence_gives_narrower_interval() -> None:
+    values = [0.012, -0.004, 0.021, 0.008, 0.017, 0.003]
+
+    wide = bootstrap_mean(values, confidence_level=0.95, resamples=500, random_seed=3)
+    narrow = bootstrap_mean(values, confidence_level=0.8, resamples=500, random_seed=3)
+
+    assert wide.lower < narrow.lower
+    assert narrow.upper < wide.upper
+
+
+def test_bootstrap_mean_preserves_caller_order() -> None:
+    seed_ordered = [0.03, -0.01, 0.02, 0.0]
+
+    result = bootstrap_mean(seed_ordered, resamples=200, random_seed=5)
+    lower, upper = _reference_interval(
+        seed_ordered,
+        confidence_level=0.95,
+        resamples=200,
+        random_seed=5,
+    )
+
+    assert result.lower == pytest.approx(lower, abs=1e-12)
+    assert result.upper == pytest.approx(upper, abs=1e-12)

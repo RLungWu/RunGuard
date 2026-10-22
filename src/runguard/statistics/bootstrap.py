@@ -22,10 +22,12 @@ def bootstrap_mean(
 
     The input values are expected to be direction-aware paired improvements.
     Baseline and candidate values must already have been paired before calling
-    this function.
+    this function, and supplied in a deterministic order (by seed). The order is
+    part of the reproducibility contract because it determines which value each
+    random draw selects.
     """
     validated_values = _validate_values(values)
-    config = _build_config(confidence_level, resamples, random_seed)
+    config = build_bootstrap_config(confidence_level, resamples, random_seed)
 
     # Each resample draws `len(validated_values)` values with replacement using
     # a local RNG seeded by `config.random_seed`.
@@ -42,10 +44,11 @@ def bootstrap_mean(
 
     # Use the linear interpolation percentile convention from the M3 spec.
     bootstrap_means.sort()
+    tail_probability = (1 - config.confidence_level) / 2
     interval = BootstrapInterval(
         statistic=sum(validated_values) / len(validated_values),
-        lower=_percentile(bootstrap_means, 0.025),
-        upper=_percentile(bootstrap_means, 0.975),
+        lower=_percentile(bootstrap_means, tail_probability),
+        upper=_percentile(bootstrap_means, 1 - tail_probability),
         sample_size=len(validated_values),
         config=config,
     )
@@ -68,15 +71,15 @@ def _validate_values(values: Sequence[float]) -> list[float]:
     if len(validated_values) < 2:
         raise BootstrapError("At least two paired values are required")
 
-    # Sorting makes the random stream independent of the caller's input order.
-    return sorted(validated_values)
+    return validated_values
 
 
-def _build_config(
+def build_bootstrap_config(
     confidence_level: float,
     resamples: int,
     random_seed: int,
 ) -> BootstrapConfig:
+    """Validate bootstrap parameters, raising `BootstrapError` when invalid."""
     try:
         if not 0 < confidence_level < 1:
             raise ValueError("confidence_level must be between 0 and 1")
