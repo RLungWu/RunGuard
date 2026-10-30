@@ -27,7 +27,7 @@ def test_compare_command_runs_end_to_end() -> None:
     )
 
     assert result.returncode == 0, result.stderr
-    assert result.stdout == (
+    assert result.stdout.startswith(
         "Comparison: baseline → candidate\n"
         "Metric: val_f1\n"
         "Value source: summary\n"
@@ -36,5 +36,8 @@ def test_compare_command_runs_end_to_end() -> None:
         "Mean paired difference: +0.020000\n"
         "Median paired difference: +0.020000\n"
         "Positive pairs: 1/1 (100.00%)\n"
+        "\n"
+        "Evidence (direction-aware improvement):\n"
     )
+    assert "Bootstrap interval: insufficient evidence" in result.stdout
     assert result.stderr == ""

@@ -2,9 +2,11 @@ import argparse
 from collections.abc import Sequence
 from pathlib import Path
 
-from runguard.comparison.models import MetricDirection
+from runguard.cli.output import render_json, render_text
+from runguard.comparison.models import CheckpointPolicy, MetricDirection, ValueSource
 from runguard.comparison.paired import ComparisonError, compare_group
 from runguard.sources.local_json import load_local_json
+from runguard.statistics.evidence import build_paired_evidence
 
 
 def main(argv: Sequence[str] | None = None) -> None:
@@ -44,6 +46,44 @@ def main(argv: Sequence[str] | None = None) -> None:
         default=MetricDirection.HIGHER_IS_BETTER.value,
         help="Whether higher or lower metric values are better.",
     )
+    compare_parser.add_argument(
+        "--value-source",
+        choices=[source.value for source in ValueSource],
+        default=ValueSource.SUMMARY.value,
+        help="Compare summary metrics or metric history (default: summary).",
+    )
+    compare_parser.add_argument(
+        "--checkpoint",
+        choices=[policy.value for policy in CheckpointPolicy],
+        help="Checkpoint policy; required with --value-source history.",
+    )
+    compare_parser.add_argument(
+        "--random-seed",
+        type=int,
+        default=0,
+        help="Bootstrap random seed, recorded in the output (default: 0).",
+    )
+    compare_parser.add_argument(
+        "--confidence-level",
+        type=float,
+        default=0.95,
+        help="Bootstrap confidence level (default: 0.95).",
+    )
+    compare_parser.add_argument(
+        "--resamples",
+        type=int,
+        default=10_000,
+        help="Bootstrap resample count (default: 10000).",
+    )
+    compare_parser.add_argument(
+        "--format",
+        choices=["text", "json"],
+        default="text",
+        help=(
+            "Output format (default: text). JSON is experimental and may change "
+            "until schema versioning is introduced."
+        ),
+    )
 
     args = parser.parse_args(argv)
 
@@ -61,22 +101,26 @@ def main(argv: Sequence[str] | None = None) -> None:
                 args.candidate,
                 args.metric,
                 direction=MetricDirection(args.direction),
+                value_source=ValueSource(args.value_source),
+                checkpoint_policy=(
+                    None
+                    if args.checkpoint is None
+                    else CheckpointPolicy(args.checkpoint)
+                ),
+            )
+            evidence = build_paired_evidence(
+                result,
+                random_seed=args.random_seed,
+                confidence_level=args.confidence_level,
+                resamples=args.resamples,
             )
         except (ComparisonError, ValueError) as error:
             compare_parser.error(str(error))
 
-        print(f"Comparison: {args.baseline} → {args.candidate}")
-        print(f"Metric: {args.metric}")
-        print(f"Value source: {result.value_source}")
-        print(f"Direction: {result.direction.value}")
-        print(f"Paired runs: {len(result.pairs)}")
-        print(f"Mean paired difference: {result.mean_difference:+.6f}")
-        print(f"Median paired difference: {result.median_difference:+.6f}")
-        print(
-            "Positive pairs: "
-            f"{result.positive_pair_count}/{len(result.pairs)} "
-            f"({result.positive_pair_rate:.2%})"
-        )
+        if args.format == "json":
+            print(render_json(evidence), end="")
+        else:
+            print(render_text(result, evidence), end="")
 
 
 if __name__ == "__main__":
