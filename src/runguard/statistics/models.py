@@ -118,3 +118,37 @@ class PairedEvidence(CanonicalModel):
     bootstrap: BootstrapInterval | InsufficientEvidence
     leave_one_pair_out: LeaveOnePairOutEvidence | InsufficientEvidence
     limitations: list[str]
+
+
+class MetricConflictEvidence(CanonicalModel):
+    """Direction comparison between the primary and one secondary metric.
+
+    `direction_conflict` is true only when the two mean improvements have
+    strictly opposite signs. No threshold or uncertainty is applied; zero is
+    not a direction. `opposing_pair_count` counts pairs whose improvements
+    have strictly opposite signs.
+    """
+
+    primary_metric: str = Field(min_length=1)
+    secondary_metric: str = Field(min_length=1)
+    primary_mean_improvement: float
+    secondary_mean_improvement: float
+    direction_conflict: bool
+    opposing_pair_count: int = Field(ge=0)
+    sample_size: int = Field(gt=0)
+
+
+class MultiMetricEvidence(CanonicalModel):
+    """Evidence for a primary metric and secondary metrics on the same pairs.
+
+    Each metric keeps its full `PairedEvidence`. Conflicts are descriptive and
+    contain no severity or release conclusion.
+    """
+
+    group_id: str = Field(min_length=1)
+    baseline_variant: str = Field(min_length=1)
+    candidate_variant: str = Field(min_length=1)
+    primary: PairedEvidence
+    secondaries: list[PairedEvidence] = Field(min_length=1)
+    conflicts: list[MetricConflictEvidence] = Field(min_length=1)
+    limitations: list[str]

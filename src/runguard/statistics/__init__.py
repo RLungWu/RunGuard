@@ -17,8 +17,14 @@ from runguard.statistics.models import (
     InsufficientEvidenceReason,
     LeaveOnePairOutChange,
     LeaveOnePairOutEvidence,
+    MetricConflictEvidence,
+    MultiMetricEvidence,
     PairedEvidence,
     PositivePairEvidence,
+)
+from runguard.statistics.multi_metric import (
+    MultiMetricError,
+    build_multi_metric_evidence,
 )
 from runguard.statistics.sensitivity import SensitivityError, leave_one_pair_out
 
@@ -35,11 +41,15 @@ __all__ = [
     "InsufficientEvidenceReason",
     "LeaveOnePairOutChange",
     "LeaveOnePairOutEvidence",
+    "MetricConflictEvidence",
+    "MultiMetricError",
+    "MultiMetricEvidence",
     "PairedEvidence",
     "PositivePairEvidence",
     "SensitivityError",
     "bootstrap_mean",
     "build_bootstrap_config",
+    "build_multi_metric_evidence",
     "build_paired_evidence",
     "leave_one_pair_out",
     "paired_cohens_dz",
