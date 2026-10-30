@@ -10,6 +10,7 @@ from runguard.statistics.models import (
     PairedEvidence,
     PositivePairEvidence,
 )
+from runguard.statistics.sensitivity import leave_one_pair_out
 
 BASE_LIMITATIONS = (
     "Seed pairing does not verify dataset, code revision, or configuration "
@@ -18,6 +19,8 @@ BASE_LIMITATIONS = (
     "was applied.",
     "Percentile bootstrap intervals can be discrete or unstable with few "
     "paired observations.",
+    "Leave-one-pair-out changes are descriptive influence measurements; they "
+    "do not label outliers or establish that one seed dominates the result.",
 )
 
 
@@ -44,6 +47,8 @@ def build_paired_evidence(
     improvements = [pair.improvement_difference for pair in pairs]
     sample_size = len(improvements)
     positive_count = sum(improvement > 0 for improvement in improvements)
+    mean_improvement = sum(improvements) / sample_size
+    median_improvement = median(improvements)
 
     bootstrap: BootstrapInterval | InsufficientEvidence
     if sample_size < 2:
@@ -72,8 +77,9 @@ def build_paired_evidence(
         value_source=comparison.value_source,
         pairs=pairs,
         sample_size=sample_size,
-        mean_improvement=sum(improvements) / sample_size,
-        median_improvement=median(improvements),
+        mean_improvement=mean_improvement,
+        median_improvement=median_improvement,
+        mean_minus_median_improvement=mean_improvement - median_improvement,
         positive_pairs=PositivePairEvidence(
             count=positive_count,
             sample_size=sample_size,
@@ -81,6 +87,7 @@ def build_paired_evidence(
         ),
         effect_size=paired_cohens_dz(improvements),
         bootstrap=bootstrap,
+        leave_one_pair_out=leave_one_pair_out(pairs),
         limitations=list(BASE_LIMITATIONS),
     )
 

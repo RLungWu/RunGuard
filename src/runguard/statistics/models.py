@@ -65,6 +65,31 @@ class PositivePairEvidence(CanonicalModel):
     rate: float = Field(ge=0, le=1)
 
 
+class LeaveOnePairOutChange(CanonicalModel):
+    """Mean improvement after removing one pair, with its source runs."""
+
+    seed: int
+    baseline_run_id: str = Field(min_length=1)
+    candidate_run_id: str = Field(min_length=1)
+    removed_improvement: float
+    leave_one_out_mean: float
+    signed_change: float
+    absolute_change: float = Field(ge=0)
+
+
+class LeaveOnePairOutEvidence(CanonicalModel):
+    """Influence of each pair on the mean improvement.
+
+    `signed_change` is `leave_one_out_mean - full_mean`. The largest influence
+    is a descriptive measurement, not an outlier or dominance label.
+    """
+
+    full_mean: float
+    sample_size: int = Field(ge=2)
+    changes: list[LeaveOnePairOutChange] = Field(min_length=2)
+    largest_influence_seed: int
+
+
 class PairedEvidence(CanonicalModel):
     """Statistical evidence for one paired metric comparison.
 
@@ -82,7 +107,9 @@ class PairedEvidence(CanonicalModel):
     sample_size: int = Field(gt=0)
     mean_improvement: float
     median_improvement: float
+    mean_minus_median_improvement: float
     positive_pairs: PositivePairEvidence
     effect_size: EffectSize | InsufficientEvidence
     bootstrap: BootstrapInterval | InsufficientEvidence
+    leave_one_pair_out: LeaveOnePairOutEvidence | InsufficientEvidence
     limitations: list[str]
