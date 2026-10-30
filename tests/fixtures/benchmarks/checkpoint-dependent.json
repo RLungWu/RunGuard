@@ -632,15 +632,15 @@
           "points": [
             {
               "step": 10,
-              "value": 0.51
+              "value": 0.513
             },
             {
               "step": 20,
-              "value": 0.46
+              "value": 0.463
             },
             {
               "step": 30,
-              "value": 0.41
+              "value": 0.413
             }
           ]
         }

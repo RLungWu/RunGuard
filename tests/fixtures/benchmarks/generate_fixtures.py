@@ -103,9 +103,12 @@ def _history(points: list[tuple[int, float]]) -> list[dict[str, object]]:
 
 def _checkpoint_group() -> dict[str, object]:
     # Candidate reaches a lower (better) loss at step 20 but ends higher at 30.
+    # Seed 10's baseline is shifted by 0.003 so that the per-seed improvements
+    # are not symmetric around their mean, which would tie the largest
+    # leave-one-out influence between seeds 1 and 10.
     runs = []
     for seed in SEEDS:
-        baseline_offset = 0.001 * seed
+        baseline_offset = 0.001 * seed + (0.003 if seed == 10 else 0.0)
         candidate_offset = 0.002 * seed
         baseline = [(10, 0.50), (20, 0.45), (30, 0.40)]
         candidate = [(10, 0.38), (20, 0.33), (30, 0.43)]
