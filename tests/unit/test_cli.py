@@ -153,7 +153,7 @@ def test_cli_reports_bootstrap_parameters_and_influence(capsys) -> None:
 
     out = capsys.readouterr().out
 
-    assert "95% percentile bootstrap interval: [+0." in out
+    assert "95% percentile bootstrap interval for the mean: [+0." in out
     assert "(10000 resamples, random seed 11)" in out
     assert "Effect size (d_z): +" in out
     assert "Largest leave-one-pair-out change: " in out
@@ -238,6 +238,7 @@ def test_cli_json_output_is_marked_experimental(capsys) -> None:
         "resamples": 200,
         "random_seed": 5,
         "method": "percentile",
+        "statistic": "mean",
     }
     assert {(p["baseline_step"], p["candidate_step"]) for p in evidence["pairs"]} == {
         (30, 20)

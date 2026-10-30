@@ -65,7 +65,8 @@ def _bootstrap_line(evidence: PairedEvidence) -> str:
 
     config = bootstrap.config
     return (
-        f"{config.confidence_level:.0%} {config.method} bootstrap interval: "
+        f"{config.confidence_level:.0%} {config.method} bootstrap interval "
+        f"for the {config.statistic}: "
         f"[{bootstrap.lower:+.6f}, {bootstrap.upper:+.6f}] "
         f"({config.resamples} resamples, random seed {config.random_seed})"
     )

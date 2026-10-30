@@ -10,7 +10,11 @@ from runguard.statistics.bootstrap import (
     _resample_indices,
     bootstrap_mean,
 )
-from runguard.statistics.models import BootstrapConfig, BootstrapMethod
+from runguard.statistics.models import (
+    BootstrapConfig,
+    BootstrapMethod,
+    BootstrapStatistic,
+)
 
 
 def test_bootstrap_config_records_reproducibility_parameters() -> None:
@@ -21,6 +25,7 @@ def test_bootstrap_config_records_reproducibility_parameters() -> None:
     )
 
     assert config.method is BootstrapMethod.PERCENTILE
+    assert config.statistic is BootstrapStatistic.MEAN
     assert config.confidence_level == 0.95
     assert config.resamples == 10_000
     assert config.random_seed == 7
