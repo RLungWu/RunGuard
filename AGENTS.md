@@ -230,7 +230,7 @@ CI 執行 pytest、Ruff 與 mypy；pre-commit 包含 Ruff lint 與 format。
 | 項目 | 待處理內容 |
 | --- | --- |
 | Milestone 狀態 | M1 仍為 Active、M2 為 Completed、M3 為 Active；M1 狀態需對齊實際交付 |
-| 版本 | `pyproject.toml` 為 `0.1.0`，changelog 最新為 `0.0.3`，M3 目標為 `0.0.4`；需統一，不能據此宣稱 stable release 已發布 |
+| 版本 | 已對齊：`pyproject.toml` 與 changelog 皆為 `0.0.3`；M3 發布時同步改為 `0.0.4`（trade-off D9） |
 | README | 架構樹與功能敘述包含規劃；範例的 confidence interval、finding 與建議尚非 CLI 現有輸出 |
 
 M3 只有在規格的 success criteria、驗證、文件、回顧及 release gate 全部滿足後，
