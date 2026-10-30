@@ -22,7 +22,7 @@ leave-one-pair-out sensitivity 與 evidence object，但不能據此認定 M3 �
 | M0 基礎設施 | Python package、CLI、pytest、Ruff、mypy、pre-commit、GitHub Actions CI | `minimal.py` 為早期流程，新能力沿 canonical 路徑開發 |
 | M1 Canonical model | Pydantic v2 strict models、三種本機 JSON 格式、驗證與 round-trip 測試；changelog 有 `0.0.2` 條目 | 不包含遠端來源、schema migration 或 artifact storage |
 | M2 本機配對比較 | seed 配對、metric direction、平均、中位數、positive-pair rate、run provenance；changelog 有 `0.0.3` 條目 | 只讀 summary；CLI 為文字輸出 |
-| M3 統計證據 | bootstrap 參數／結果模型、`bootstrap_mean`、paired `d_z`、positive-pair evidence、mean-vs-median、leave-one-pair-out sensitivity、summary／final／best 選值、multi-metric conflict evidence、`build_paired_evidence` 與單元測試 | Checkpoint 選值已在 API（`compare_group` 的 `value_source`／`checkpoint_policy`）；尚缺 benchmark fixtures 與 CLI 整合 |
+| M3 統計證據 | bootstrap 參數／結果模型、`bootstrap_mean`、paired `d_z`、positive-pair evidence、mean-vs-median、leave-one-pair-out sensitivity、summary／final／best 選值、multi-metric conflict evidence、config 差異 evidence、`build_paired_evidence`、benchmark 與 SciPy reference 測試 | Checkpoint 選值已在 API（`compare_group` 的 `value_source`／`checkpoint_policy`）；十組 seed benchmark 已完成；尚缺 CLI 整合與 release gate |
 | 後續里程碑 | 規劃記於 `ROADMAP.md` | findings、release policies、W&B／MLflow adapters 尚未實作 |
 
 ## 2. 開工與交付流程
@@ -67,6 +67,7 @@ src/runguard/
   comparison/models.py      metric direction、pair、comparison result
   comparison/selection.py   summary／history checkpoint 選值
   comparison/paired.py      canonical seed 配對與比較
+  comparison/config.py      paired runs 的描述性 config 差異
   comparison/minimal.py     M0 早期最小比較流程
   statistics/models.py      bootstrap、effect size 與 evidence models
   statistics/bootstrap.py   percentile bootstrap 實作
@@ -77,8 +78,9 @@ src/runguard/
   cli/main.py               argparse 入口與模組組合
 tests/
   unit/                     模組與契約測試
-  integration/              compare CLI 端到端測試
+  integration/              compare CLI 端到端測試與 M3 benchmark scenarios
   fixtures/                 有效、無效與合成實驗資料
+  fixtures/benchmarks/      十組 seed benchmark fixtures、generator 與設計說明
 docs/
   milestones/               詳細範圍、驗收、決策與回顧
   adr/                      架構決策
@@ -184,14 +186,15 @@ M3 輸出統計證據及限制，不產生 severity、因果結論或 Pass / War
 不自動刪除 outlier，也不將 influence 數字直接轉成「被單一 seed 主導」的結論。
 主要 benchmark 目標約十組 paired seeds，與 bootstrap resamples 數量分開記錄。
 
-接手順序：依 M3 planned issues 接續約十組 seed 的 benchmark fixtures 與 CLI 整合。
+接手順序：依 M3 planned issues 接續 CLI 整合（D7），再處理 README、changelog、
+retrospective 與 `v0.0.4` release gate。修改 benchmark fixtures 時改 generator 再重新產生。
 M3 的 Open Questions 已於 2026-10-30 定案（trade-off 紀錄 D4–D8），開工前先查看
 對應條目；新的未決問題記入 trade-off 紀錄，不自行視為已定案。
 
 ## 7. 開發環境與驗證
 
 Python 需求為 `>=3.11`，`.python-version` 與 CI 使用 3.11；runtime dependency
-為 Pydantic v2。優先使用既有 `.venv`；新環境設定如下：
+為 Pydantic v2；NumPy／SciPy 只在 dev extra 中作為測試 reference，`src/` 不得 import。優先使用既有 `.venv`；新環境設定如下：
 
 ```bash
 python3.11 -m venv .venv
