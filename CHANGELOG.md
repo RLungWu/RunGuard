@@ -18,6 +18,9 @@
 - Missing history evidence is reported by reason with the affected run IDs.
 - Evidence limitations now describe the value source, including that
   best-checkpoint selection can be optimistic.
+- Multi-metric evidence combining a primary metric with secondary metrics on
+  the same paired runs, with sign-based direction-conflict flags and
+  opposing-pair counts, and no severity or release conclusion.
 
 ### Changed
 

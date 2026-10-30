@@ -25,7 +25,7 @@ D1–D10 於 2026-10-30 依建議定案。
 | D3 | 純標準庫 vs NumPy／SciPy | 已定案 | runtime 維持標準庫；SciPy dev-only 待 benchmark slice 加入 |
 | D4 | Incomplete-pair 模式 | 已定案 | M3 規格 Open Questions |
 | D5 | 可容許差異的 config 欄位 | 已定案 | M3 規格 Open Questions；benchmark fixtures |
-| D6 | Multi-metric 衝突定義與 CLI | 已定案，待實作 | M3 規格 Open Questions；multi-metric slice |
+| D6 | Multi-metric 衝突定義與 CLI | 已定案，API 已實作 | `statistics/multi_metric.py`；CLI 依決議不暴露 |
 | D7 | CLI evidence 輸出格式 | 已定案，待實作 | CLI 整合 slice |
 | D8 | Median CI 與 BCa | 已定案 | M3 規格 Open Questions；已知限制 |
 | D9 | 版本號對齊 | 已定案 | `pyproject.toml` |
@@ -109,7 +109,9 @@ D1–D10 於 2026-10-30 依建議定案。
 - **決議**：A 放在 API，並同時保留兩個 metric 的完整 `PairedEvidence`，讓 B 之後由
   policy 層自行計算。CLI 在 M3 只暴露單一 metric evidence，multi-metric CLI 等 M4
   report 模型。
-- **落實**：multi-metric slice。
+- **落實**：`statistics/multi_metric.py` 的 `build_multi_metric_evidence`。另加一個不影響
+  旗標的描述性欄位 `opposing_pair_count`（兩個 metric 在同一 pair 方向相反的數量），
+  讓 policy 層能區分「平均相反」與「逐 seed 相反」。
 
 ### D7. CLI evidence 輸出格式
 
