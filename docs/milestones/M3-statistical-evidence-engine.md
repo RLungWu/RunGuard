@@ -6,10 +6,10 @@ Active
 
 Implementation has started. The bootstrap reference path, paired effect size,
 positive-pair evidence, mean-versus-median evidence, leave-one-pair-out
-sensitivity, summary and final/best checkpoint value selection, and the
-structured evidence object are implemented in the analysis API. Multi-metric,
-benchmark, and CLI work remain open; the CLI does not yet expose checkpoint
-selection. Pending trade-offs for the
+sensitivity, summary and final/best checkpoint value selection, multi-metric
+direction-conflict evidence, and the structured evidence objects are
+implemented in the analysis API. Benchmark fixtures and CLI work remain open;
+the CLI does not yet expose checkpoint selection. Pending trade-offs for the
 remaining work are tracked in the
 [trade-off register](../architecture/tradeoffs-and-tech-choices.md).
 
@@ -400,6 +400,15 @@ The following decisions were agreed during M3 planning:
   selection; non-finite values are rejected later by the statistics layer.
 * Best-checkpoint evidence carries an explicit limitation that the selection
   can be optimistic compared with a checkpoint fixed in advance.
+* `build_multi_metric_evidence` combines existing `PairedEvidence` objects
+  rather than re-running comparisons. Every metric must share the group,
+  variants, and exact `(seed, baseline run, candidate run)` pairs; duplicate
+  metrics are rejected. Metrics may use different value sources or checkpoint
+  policies, and each keeps its own.
+* `direction_conflict` is true only for strictly opposite signs of the primary
+  and secondary mean improvements; a zero mean is not a direction. A separate
+  descriptive `opposing_pair_count` counts pairs with strictly opposite
+  improvement signs and does not affect the flag.
 
 ## Retrospective
 
