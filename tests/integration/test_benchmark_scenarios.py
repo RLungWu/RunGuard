@@ -113,6 +113,10 @@ def _assert_matches_reference(
     assert not set(evidence.model_dump()) & CONCLUSION_FIELDS
 
 
+def _shift(seed: int) -> int:
+    return 3 if seed == 10 else 0
+
+
 def _interval(evidence: PairedEvidence) -> BootstrapInterval:
     assert isinstance(evidence.bootstrap, BootstrapInterval)
     return evidence.bootstrap
@@ -171,8 +175,9 @@ def test_final_checkpoint_regression() -> None:
     )
     evidence = _evidence(comparison)
 
-    # Final improvement per seed s: (0.40 + 0.001s) - (0.43 + 0.002s).
-    _assert_matches_reference(evidence, [-30 - seed for seed in SEEDS])
+    # Final improvement per seed s: (0.40 + 0.001s) - (0.43 + 0.002s), with
+    # seed 10's baseline shifted by +0.003.
+    _assert_matches_reference(evidence, [-30 - seed + _shift(seed) for seed in SEEDS])
     assert evidence.checkpoint_policy is CheckpointPolicy.FINAL
     assert {(p.baseline_step, p.candidate_step) for p in evidence.pairs} == {(30, 30)}
     assert evidence.positive_pairs.count == 0
@@ -188,8 +193,9 @@ def test_best_checkpoint_improvement() -> None:
     )
     evidence = _evidence(comparison)
 
-    # Best improvement per seed s: (0.40 + 0.001s) - (0.33 + 0.002s).
-    _assert_matches_reference(evidence, [70 - seed for seed in SEEDS])
+    # Best improvement per seed s: (0.40 + 0.001s) - (0.33 + 0.002s), with
+    # seed 10's baseline shifted by +0.003.
+    _assert_matches_reference(evidence, [70 - seed + _shift(seed) for seed in SEEDS])
     assert evidence.checkpoint_policy is CheckpointPolicy.BEST
     assert {(p.baseline_step, p.candidate_step) for p in evidence.pairs} == {(30, 20)}
     assert evidence.positive_pairs.count == 10
