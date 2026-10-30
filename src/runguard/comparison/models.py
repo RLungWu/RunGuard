@@ -9,6 +9,44 @@ class MetricDirection(StrEnum):
     LOWER_IS_BETTER = "lower-is-better"
 
 
+class ValueSource(StrEnum):
+    SUMMARY = "summary"
+    HISTORY = "history"
+
+
+class CheckpointPolicy(StrEnum):
+    FINAL = "final"
+    BEST = "best"
+
+
+class MissingValueReason(StrEnum):
+    METRIC_NOT_FOUND = "metric-not-found"
+    AMBIGUOUS_SERIES = "ambiguous-series"
+    EMPTY_HISTORY = "empty-history"
+    MISSING_VALUE = "missing-value"
+    NO_VALID_VALUE = "no-valid-value"
+    NON_FINITE_VALUE = "non-finite-value"
+
+
+class SelectedValue(BaseModel):
+    """One run's comparison value; `step` is set only for history values."""
+
+    model_config = ConfigDict(strict=True, extra="forbid")
+
+    run_id: str = Field(min_length=1)
+    value: float
+    step: int | None = None
+
+
+class MissingValue(BaseModel):
+    """Explicit record that no comparison value could be selected for a run."""
+
+    model_config = ConfigDict(strict=True, extra="forbid")
+
+    run_id: str = Field(min_length=1)
+    reason: MissingValueReason
+
+
 class ComparisonPair(BaseModel):
     model_config = ConfigDict(strict=True, extra="forbid")
 
