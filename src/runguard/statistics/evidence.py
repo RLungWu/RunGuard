@@ -75,6 +75,7 @@ def build_paired_evidence(
         metric=comparison.metric,
         direction=comparison.direction,
         value_source=comparison.value_source,
+        checkpoint_policy=comparison.checkpoint_policy,
         pairs=pairs,
         sample_size=sample_size,
         mean_improvement=mean_improvement,

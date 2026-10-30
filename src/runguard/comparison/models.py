@@ -1,7 +1,7 @@
 from enum import StrEnum
-from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
+from typing_extensions import Self
 
 
 class MetricDirection(StrEnum):
@@ -57,6 +57,8 @@ class ComparisonPair(BaseModel):
     candidate_value: float
     raw_difference: float
     improvement_difference: float
+    baseline_step: int | None = None
+    candidate_step: int | None = None
 
 
 class ComparisonResult(BaseModel):
@@ -66,7 +68,8 @@ class ComparisonResult(BaseModel):
     baseline_variant: str = Field(min_length=1)
     candidate_variant: str = Field(min_length=1)
     metric: str = Field(min_length=1)
-    value_source: Literal["summary"] = "summary"
+    value_source: ValueSource = ValueSource.SUMMARY
+    checkpoint_policy: CheckpointPolicy | None = None
     direction: MetricDirection
     pairs: list[ComparisonPair]
     mean_difference: float
@@ -75,3 +78,26 @@ class ComparisonResult(BaseModel):
     median_improvement: float
     positive_pair_count: int
     positive_pair_rate: float
+
+    @model_validator(mode="after")
+    def validate_value_provenance(self) -> Self:
+        # Summary values carry no policy or steps; history values carry both.
+        is_history = self.value_source is ValueSource.HISTORY
+        if is_history != (self.checkpoint_policy is not None):
+            raise ValueError(
+                "checkpoint_policy is required for history values and not "
+                "allowed for summary values"
+            )
+
+        for pair in self.pairs:
+            steps = (pair.baseline_step, pair.candidate_step)
+            if is_history and None in steps:
+                raise ValueError(
+                    f"History pair for seed {pair.seed} must record both steps"
+                )
+            if not is_history and steps != (None, None):
+                raise ValueError(
+                    f"Summary pair for seed {pair.seed} must not record steps"
+                )
+
+        return self
