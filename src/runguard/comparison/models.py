@@ -101,3 +101,44 @@ class ComparisonResult(BaseModel):
                 )
 
         return self
+
+
+class ConfigDifference(BaseModel):
+    """One top-level configuration key whose value differs within a pair.
+
+    A key absent from one run is recorded with `*_present=False` so that a
+    missing key is never confused with an explicit `None` value.
+    """
+
+    model_config = ConfigDict(strict=True, extra="forbid")
+
+    key: str = Field(min_length=1)
+    baseline_present: bool
+    candidate_present: bool
+    baseline_value: object = None
+    candidate_value: object = None
+
+
+class PairConfigDifferences(BaseModel):
+    model_config = ConfigDict(strict=True, extra="forbid")
+
+    seed: int
+    baseline_run_id: str = Field(min_length=1)
+    candidate_run_id: str = Field(min_length=1)
+    differences: list[ConfigDifference]
+
+
+class ConfigComparisonEvidence(BaseModel):
+    """Descriptive configuration differences between paired runs.
+
+    It does not decide whether a difference is the intended treatment or an
+    incompatible comparison, and it makes no causal claim.
+    """
+
+    model_config = ConfigDict(strict=True, extra="forbid")
+
+    group_id: str = Field(min_length=1)
+    baseline_variant: str = Field(min_length=1)
+    candidate_variant: str = Field(min_length=1)
+    pairs: list[PairConfigDifferences]
+    differing_keys: list[str]
