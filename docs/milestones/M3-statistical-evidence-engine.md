@@ -2,18 +2,12 @@
 
 ## Status
 
-Active
+Active — release candidate for `v0.0.4`.
 
-Implementation has started. The bootstrap reference path, paired effect size,
-positive-pair evidence, mean-versus-median evidence, leave-one-pair-out
-sensitivity, summary and final/best checkpoint value selection, multi-metric
-direction-conflict evidence, descriptive configuration differences, and the
-structured evidence objects are implemented in the analysis API. Ten-seed
-benchmark fixtures cover every benchmark scenario. `runguard compare` prints
-the evidence as text or experimental JSON and supports checkpoint selection.
-The release gate (README review, retrospective, version, and tag) remains
-open. Pending trade-offs for the
-remaining work are tracked in the
+All planned implementation slices are delivered and every success criterion is
+met locally (see [Success Criteria Audit](#success-criteria-audit)). M3 becomes
+Completed only after the branch passes CI, is merged to `main`, and `v0.0.4`
+is tagged. Trade-offs are tracked in the
 [trade-off register](../architecture/tradeoffs-and-tech-choices.md).
 
 ## Goal
@@ -249,6 +243,29 @@ label.
 * The canonical comparison path remains independent of source adapters.
 * `pytest`, `ruff check .`, `mypy src`, and pre-commit checks pass.
 
+## Success Criteria Audit
+
+Audited on 2026-10-30 against the code and tests on the M3 branch.
+
+| Criterion | Status | Evidence |
+| --- | --- | --- |
+| Bootstrap matches a reference within a documented tolerance | Met | `test_bootstrap.py` reference with the same RNG (`abs=1e-12`); `test_scipy_reference.py` against `scipy.stats.bootstrap` within 0.25 SE of the mean |
+| Same input, parameters, and seed give identical output | Met | `test_evidence_is_reproducible`, `test_benchmark_evidence_is_reproducible`; pinned index stream and interval golden tests (D2) |
+| Every benchmark scenario produces the expected evidence | Met | `tests/integration/test_benchmark_scenarios.py`, one test per scenario in `tests/fixtures/benchmarks/README.md` |
+| About ten paired seeds in primary scenarios | Met | All primary benchmark fixtures use seeds 1–10 |
+| Fewer than two pairs give explicit insufficient evidence | Met | `test_evidence_reports_insufficient_evidence_for_single_pair`; CLI golden output for one pair |
+| Leave-one-pair-out identifies the largest influence | Met | `test_sensitivity.py`; every benchmark design has a unique largest influence checked against an exact reference |
+| Mean, median, effect size, and positive rate preserve direction | Met | Lower-is-better evidence and checkpoint tests; benchmark latency and `val_loss` scenarios |
+| Missing runs, values, and pairing problems are visible | Met | Strict `ComparisonError` messages list seeds and run IDs by reason; config differences reported by `compare_run_configs` |
+| Checkpoint values identify policy and step | Met | `ComparisonResult.checkpoint_policy`, per-pair steps, result validator; `test_selection.py`, checkpoint benchmarks |
+| Evidence identifies source runs and reproduction parameters | Met | Pairs keep run IDs and steps; `BootstrapConfig` records statistic, method, level, resamples, and seed |
+| No release conclusions or causal interpretation | Met | Conclusion-field checks in evidence, multi-metric, config, benchmark, and CLI tests |
+| Canonical path independent of source adapters | Met | `test_module_boundaries.py` checks imports of `domain`, `comparison`, and `statistics` |
+| `pytest`, `ruff check .`, `mypy src`, pre-commit pass | Met locally | 176 tests; must also pass in CI before merge |
+
+Assumptions are recorded as statements in each evidence object's
+`limitations` list rather than in a separate field.
+
 ## Risks
 
 ### Small paired sample sizes
@@ -330,6 +347,20 @@ M3 is ready to complete when:
 * `CHANGELOG.md` contains the `v0.0.4` entry;
 * the retrospective is complete;
 * the `v0.0.4` release is tagged after the changes are merged to `main`.
+
+Gate status on 2026-10-30:
+
+| Gate item | Status |
+| --- | --- |
+| All success criteria satisfied | Done locally; CI pending |
+| Statistical outputs checked against a reference | Done |
+| Benchmarks demonstrate uncertainty and sensitivity | Done |
+| Evidence preserves provenance and parameters | Done |
+| Known limitations and unresolved policy decisions documented | Done (`CHANGELOG.md`, this specification, trade-off register) |
+| CLI exposes evidence without release conclusions | Done |
+| `CHANGELOG.md` contains the `v0.0.4` entry | Done |
+| Retrospective complete | Done |
+| `v0.0.4` tagged after merge to `main` | Pending: needs PR review, CI, merge, and tag |
 
 ## Decisions Made During Implementation
 
@@ -437,7 +468,55 @@ The following decisions were agreed during M3 planning:
 
 ## Retrospective
 
-To be completed after implementation. It should record which statistical
-assumptions survived reference testing, which benchmark scenarios exposed
-limitations, and which policy or interpretation questions were deferred to M4
-or M5.
+### Assumptions that survived reference testing
+
+* The paired percentile bootstrap agreed exactly with an independent stdlib
+  reference using the same random stream, and with `scipy.stats.bootstrap`
+  within 0.25 standard errors of the mean (largest observed gap about 0.16).
+* Paired `d_z` with the `n - 1` standard deviation matched NumPy and an exact
+  `Fraction` reference in every benchmark design.
+* The closed form `(mean - x_i) / (n - 1)` for leave-one-pair-out changes
+  matched the implementation, which computes leave-one-out means directly.
+* Recalculating every statistic from the stored pairs, instead of trusting
+  comparison aggregates, kept evidence reproducible from its own contents.
+
+### What the benchmarks and references exposed
+
+* `random.choices` is not guaranteed to be stable across Python versions.
+  Deriving indices from `random()` (D2) kept 3.11 results identical while
+  making the reproducibility contract version-independent.
+* Symmetric designs tie the largest leave-one-out influence, and the tie is
+  then decided by floating-point rounding. This happened twice, in a unit
+  fixture and in the checkpoint benchmark, and was found only when the CLI
+  printed the result. Benchmark designs are now checked for unique largest
+  influence with exact arithmetic; the implementation keeps exact comparison
+  with a smallest-seed tie-break.
+* The increased-variance scenario is visible only as a large improvement
+  standard deviation and an interval spanning zero. Paired evidence does not
+  measure each variant's own variance.
+* The single-seed-dominated scenario shows a large mean-minus-median gap and a
+  leave-one-out mean near zero, but M3 deliberately does not label it.
+* The evidence requirements asked for the statistic definition, which was only
+  implicit until the release-gate audit added `BootstrapConfig.statistic`.
+
+### Design changes during M3
+
+* Checkpoint selection required amending ADR-0004 and extending the M2
+  `ComparisonPair` and `ComparisonResult` schemas with steps, value source, and
+  checkpoint policy (D1).
+* Configuration-difference evidence was not in the original planned issues but
+  was needed for the incompatible and confounded benchmark scenarios (D5).
+* `runguard compare` now prints evidence by default, which changed the M2 text
+  output (D11).
+
+### Deferred to M4, M5, or later
+
+* Incomplete-pair analysis mode — M5 missing-data policy (D4).
+* Configuration compatibility allow-lists — M5 policy (D5).
+* Uncertainty-aware metric conflict, outlier or dominance labels, and any
+  thresholds — M4 findings and M5 policies (D6).
+* JSON schema versioning, and CLI output for multi-metric and configuration
+  evidence — M4 report and finding model (D6, D7).
+* Median confidence intervals and BCa — only if benchmarks show insufficient
+  coverage (D8).
+* Writing ADR-0002 and ADR-0003 (D10).
