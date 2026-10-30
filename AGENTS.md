@@ -22,7 +22,7 @@ leave-one-pair-out sensitivity 與 evidence object，但不能據此認定 M3 �
 | M0 基礎設施 | Python package、CLI、pytest、Ruff、mypy、pre-commit、GitHub Actions CI | `minimal.py` 為早期流程，新能力沿 canonical 路徑開發 |
 | M1 Canonical model | Pydantic v2 strict models、三種本機 JSON 格式、驗證與 round-trip 測試；changelog 有 `0.0.2` 條目 | 不包含遠端來源、schema migration 或 artifact storage |
 | M2 本機配對比較 | seed 配對、metric direction、平均、中位數、positive-pair rate、run provenance；changelog 有 `0.0.3` 條目 | 只讀 summary；CLI 為文字輸出 |
-| M3 統計證據 | bootstrap 參數／結果模型、`bootstrap_mean`、paired `d_z`、positive-pair evidence、mean-vs-median、leave-one-pair-out sensitivity、`build_paired_evidence` 與單元測試 | 尚缺 checkpoint、multi-metric、benchmark fixtures 與 CLI 整合 |
+| M3 統計證據 | bootstrap 參數／結果模型、`bootstrap_mean`、paired `d_z`、positive-pair evidence、mean-vs-median、leave-one-pair-out sensitivity、summary／final／best 選值、`build_paired_evidence` 與單元測試 | Checkpoint 選值已在 API（`compare_group` 的 `value_source`／`checkpoint_policy`）；尚缺 multi-metric、benchmark fixtures 與 CLI 整合 |
 | 後續里程碑 | 規劃記於 `ROADMAP.md` | findings、release policies、W&B／MLflow adapters 尚未實作 |
 
 ## 2. 開工與交付流程
@@ -65,7 +65,8 @@ src/runguard/
   domain/models.py          canonical experiment、run、metric models
   sources/local_json.py     本機 JSON 載入與格式轉換
   comparison/models.py      metric direction、pair、comparison result
-  comparison/paired.py      canonical seed 配對與 summary 比較
+  comparison/selection.py   summary／history checkpoint 選值
+  comparison/paired.py      canonical seed 配對與比較
   comparison/minimal.py     M0 早期最小比較流程
   statistics/models.py      bootstrap、effect size 與 evidence models
   statistics/bootstrap.py   percentile bootstrap 實作
@@ -130,8 +131,9 @@ artifact storage 與遠端 API 不在已交付範圍。
 ### M2：本機 canonical paired comparison
 
 `compare_group()` 接收 `ExperimentGroup`、兩個 variant、metric 與 direction，
-回傳 `ComparisonResult`。目前只讀 `Run.summary_metrics[metric]`，
-`value_source` 固定為 `summary`，缺值時不可自動改讀 history。
+回傳 `ComparisonResult`。M2 交付時只讀 `Run.summary_metrics[metric]`；M3 起預設仍為
+`value_source=summary`，另可明確指定 `history` 加 `final`／`best` checkpoint policy
+（見 ADR-0004 Value selection）。各來源間不 fallback，缺值時不可自動改讀其他來源。
 
 | 數值 | 定義 |
 | --- | --- |
@@ -163,7 +165,7 @@ Checkpoint selection、統計 evidence、incomplete-pair 模式與 release polic
 ## 6. M3 實作契約與待辦
 
 M3 輸出統計證據及限制，不產生 severity、因果結論或 Pass / Warn / Fail。
-下列是目標契約；bootstrap、effect size、positive-pair、leave-one-pair-out 與 evidence object 已實作，
+下列是目標契約；bootstrap、effect size、positive-pair、leave-one-pair-out、checkpoint 選值與 evidence object 已實作，
 其餘仍需分段實作與驗收。
 
 | 能力 | 契約 |
@@ -173,16 +175,16 @@ M3 輸出統計證據及限制，不產生 severity、因果結論或 Pass / War
 | 樣本不足 | 少於兩個 pair 時，`PairedEvidence` 以 `InsufficientEvidence` 表達；底層 `bootstrap_mean` 仍以 `BootstrapError` 拒絕 |
 | Effect size | Paired Cohen's `d_z`，sample standard deviation 使用 `n - 1`；零變異回報 `zero-variance` insufficient evidence |
 | Leave-one-pair-out | 只對 mean；保留移除的 seed／run IDs、完整與移除後平均、signed（`loo - full`）／absolute change；最大影響完全平手時取最小 seed |
-| Final checkpoint | 選最大 step；末點 missing 必須回報 missing evidence |
-| Best checkpoint | 依 direction 選最佳值，平手選最早 step；無有效值時回報 missing evidence |
-| Provenance | 保留輸入 pairs、來源 run IDs、方法參數、checkpoint policy／step、假設與限制 |
+| Final checkpoint | 選最大 step；末點 missing 必須回報 missing evidence，不改用較早的點 |
+| Best checkpoint | 依 direction 選最佳值，忽略 missing，平手選最早 step；無有效值時回報 missing evidence；非有限值無法排序而拒絕 |
+| Provenance | 保留輸入 pairs、來源 run IDs、方法參數、value source、checkpoint policy（result 層）／selected step（pair 層）、假設與限制 |
 
 不自動刪除 outlier，也不將 influence 數字直接轉成「被單一 seed 主導」的結論。
 主要 benchmark 目標約十組 paired seeds，與 bootstrap resamples 數量分開記錄。
 
-接手順序：依 M3 planned issues 接續 checkpoint、multi-metric、benchmark 與
-CLI 整合；開工前先查看 trade-off 紀錄中對應的待決項目（例如 checkpoint 選值的 D1）。配置相容欄位、額外 incomplete-pair 模式及 multi-metric CLI 仍有未決問題，
-請查閱 M3 規格，不自行視為已定案。
+接手順序：依 M3 planned issues 接續 multi-metric、benchmark 與 CLI 整合。
+M3 的 Open Questions 已於 2026-10-30 定案（trade-off 紀錄 D4–D8），開工前先查看
+對應條目；新的未決問題記入 trade-off 紀錄，不自行視為已定案。
 
 ## 7. 開發環境與驗證
 
