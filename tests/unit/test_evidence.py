@@ -10,6 +10,7 @@ from runguard.statistics.models import (
     EffectSize,
     InsufficientEvidence,
     InsufficientEvidenceReason,
+    LeaveOnePairOutEvidence,
 )
 
 # Ten paired seeds; candidate improves loss on seven seeds, ties on one.
@@ -79,6 +80,33 @@ def test_evidence_uses_direction_aware_improvements() -> None:
     assert evidence.mean_improvement == pytest.approx(expected_mean)
     assert evidence.mean_improvement == pytest.approx(0.0115)
     assert evidence.median_improvement == pytest.approx(0.015)
+
+
+def test_evidence_reports_mean_minus_median() -> None:
+    evidence = build_paired_evidence(_ten_seed_comparison(), random_seed=7)
+
+    # Mean 11.5e-3 sits below median 15e-3 because of the two regressing seeds.
+    assert evidence.mean_minus_median_improvement == pytest.approx(-0.0035)
+
+
+def test_evidence_reports_leave_one_pair_out_reference_values() -> None:
+    evidence = build_paired_evidence(_ten_seed_comparison(), random_seed=7)
+
+    # Removing pair i moves the mean by (mean - x_i) / (n - 1). In 1e-3 units
+    # seeds 3 and 7 (x = -5) both move it by 16.5 / 9, the largest change;
+    # the tie selects the smaller seed.
+    loo = evidence.leave_one_pair_out
+    assert isinstance(loo, LeaveOnePairOutEvidence)
+    assert loo.full_mean == pytest.approx(evidence.mean_improvement)
+    assert [change.seed for change in loo.changes] == list(range(1, 11))
+    assert loo.largest_influence_seed == 3
+
+    seed_3 = loo.changes[2]
+    assert seed_3.baseline_run_id == "baseline-3"
+    assert seed_3.candidate_run_id == "candidate-3"
+    assert seed_3.leave_one_out_mean == pytest.approx(0.001 * 120 / 9)
+    assert seed_3.signed_change == pytest.approx(0.001 * 16.5 / 9)
+    assert loo.changes[8].signed_change == pytest.approx(-0.001 * 13.5 / 9)
 
 
 def test_evidence_counts_strictly_positive_pairs() -> None:
@@ -155,6 +183,8 @@ def test_evidence_reports_insufficient_evidence_for_single_pair() -> None:
     assert (
         evidence.effect_size.reason is InsufficientEvidenceReason.FEWER_THAN_TWO_PAIRS
     )
+    assert isinstance(evidence.leave_one_pair_out, InsufficientEvidence)
+    assert evidence.mean_minus_median_improvement == 0.0
 
 
 def test_evidence_validates_bootstrap_parameters_for_single_pair() -> None:
