@@ -1,0 +1,385 @@
+{
+  "group_id": "conflicting-metrics",
+  "runs": [
+    {
+      "run_id": "baseline-seed-1",
+      "variant": "baseline",
+      "seed": 1,
+      "config": {
+        "values": {
+          "lr": 0.001,
+          "optimizer": "adam",
+          "dataset": "imagenet-v1",
+          "code_revision": "a1b2c3d",
+          "augmentation": "none"
+        }
+      },
+      "metrics": [],
+      "summary_metrics": {
+        "val_f1": 0.8,
+        "latency_ms": 20.0
+      }
+    },
+    {
+      "run_id": "candidate-seed-1",
+      "variant": "candidate",
+      "seed": 1,
+      "config": {
+        "values": {
+          "lr": 0.001,
+          "optimizer": "adam",
+          "dataset": "imagenet-v1",
+          "code_revision": "a1b2c3d",
+          "augmentation": "mixup"
+        }
+      },
+      "metrics": [],
+      "summary_metrics": {
+        "val_f1": 0.812,
+        "latency_ms": 22.0
+      }
+    },
+    {
+      "run_id": "baseline-seed-2",
+      "variant": "baseline",
+      "seed": 2,
+      "config": {
+        "values": {
+          "lr": 0.001,
+          "optimizer": "adam",
+          "dataset": "imagenet-v1",
+          "code_revision": "a1b2c3d",
+          "augmentation": "none"
+        }
+      },
+      "metrics": [],
+      "summary_metrics": {
+        "val_f1": 0.805,
+        "latency_ms": 20.0
+      }
+    },
+    {
+      "run_id": "candidate-seed-2",
+      "variant": "candidate",
+      "seed": 2,
+      "config": {
+        "values": {
+          "lr": 0.001,
+          "optimizer": "adam",
+          "dataset": "imagenet-v1",
+          "code_revision": "a1b2c3d",
+          "augmentation": "mixup"
+        }
+      },
+      "metrics": [],
+      "summary_metrics": {
+        "val_f1": 0.814,
+        "latency_ms": 21.5
+      }
+    },
+    {
+      "run_id": "baseline-seed-3",
+      "variant": "baseline",
+      "seed": 3,
+      "config": {
+        "values": {
+          "lr": 0.001,
+          "optimizer": "adam",
+          "dataset": "imagenet-v1",
+          "code_revision": "a1b2c3d",
+          "augmentation": "none"
+        }
+      },
+      "metrics": [],
+      "summary_metrics": {
+        "val_f1": 0.795,
+        "latency_ms": 20.0
+      }
+    },
+    {
+      "run_id": "candidate-seed-3",
+      "variant": "candidate",
+      "seed": 3,
+      "config": {
+        "values": {
+          "lr": 0.001,
+          "optimizer": "adam",
+          "dataset": "imagenet-v1",
+          "code_revision": "a1b2c3d",
+          "augmentation": "mixup"
+        }
+      },
+      "metrics": [],
+      "summary_metrics": {
+        "val_f1": 0.806,
+        "latency_ms": 22.5
+      }
+    },
+    {
+      "run_id": "baseline-seed-4",
+      "variant": "baseline",
+      "seed": 4,
+      "config": {
+        "values": {
+          "lr": 0.001,
+          "optimizer": "adam",
+          "dataset": "imagenet-v1",
+          "code_revision": "a1b2c3d",
+          "augmentation": "none"
+        }
+      },
+      "metrics": [],
+      "summary_metrics": {
+        "val_f1": 0.81,
+        "latency_ms": 20.0
+      }
+    },
+    {
+      "run_id": "candidate-seed-4",
+      "variant": "candidate",
+      "seed": 4,
+      "config": {
+        "values": {
+          "lr": 0.001,
+          "optimizer": "adam",
+          "dataset": "imagenet-v1",
+          "code_revision": "a1b2c3d",
+          "augmentation": "mixup"
+        }
+      },
+      "metrics": [],
+      "summary_metrics": {
+        "val_f1": 0.82,
+        "latency_ms": 19.5
+      }
+    },
+    {
+      "run_id": "baseline-seed-5",
+      "variant": "baseline",
+      "seed": 5,
+      "config": {
+        "values": {
+          "lr": 0.001,
+          "optimizer": "adam",
+          "dataset": "imagenet-v1",
+          "code_revision": "a1b2c3d",
+          "augmentation": "none"
+        }
+      },
+      "metrics": [],
+      "summary_metrics": {
+        "val_f1": 0.79,
+        "latency_ms": 20.0
+      }
+    },
+    {
+      "run_id": "candidate-seed-5",
+      "variant": "candidate",
+      "seed": 5,
+      "config": {
+        "values": {
+          "lr": 0.001,
+          "optimizer": "adam",
+          "dataset": "imagenet-v1",
+          "code_revision": "a1b2c3d",
+          "augmentation": "mixup"
+        }
+      },
+      "metrics": [],
+      "summary_metrics": {
+        "val_f1": 0.798,
+        "latency_ms": 22.0
+      }
+    },
+    {
+      "run_id": "baseline-seed-6",
+      "variant": "baseline",
+      "seed": 6,
+      "config": {
+        "values": {
+          "lr": 0.001,
+          "optimizer": "adam",
+          "dataset": "imagenet-v1",
+          "code_revision": "a1b2c3d",
+          "augmentation": "none"
+        }
+      },
+      "metrics": [],
+      "summary_metrics": {
+        "val_f1": 0.8,
+        "latency_ms": 20.0
+      }
+    },
+    {
+      "run_id": "candidate-seed-6",
+      "variant": "candidate",
+      "seed": 6,
+      "config": {
+        "values": {
+          "lr": 0.001,
+          "optimizer": "adam",
+          "dataset": "imagenet-v1",
+          "code_revision": "a1b2c3d",
+          "augmentation": "mixup"
+        }
+      },
+      "metrics": [],
+      "summary_metrics": {
+        "val_f1": 0.814,
+        "latency_ms": 23.0
+      }
+    },
+    {
+      "run_id": "baseline-seed-7",
+      "variant": "baseline",
+      "seed": 7,
+      "config": {
+        "values": {
+          "lr": 0.001,
+          "optimizer": "adam",
+          "dataset": "imagenet-v1",
+          "code_revision": "a1b2c3d",
+          "augmentation": "none"
+        }
+      },
+      "metrics": [],
+      "summary_metrics": {
+        "val_f1": 0.805,
+        "latency_ms": 20.0
+      }
+    },
+    {
+      "run_id": "candidate-seed-7",
+      "variant": "candidate",
+      "seed": 7,
+      "config": {
+        "values": {
+          "lr": 0.001,
+          "optimizer": "adam",
+          "dataset": "imagenet-v1",
+          "code_revision": "a1b2c3d",
+          "augmentation": "mixup"
+        }
+      },
+      "metrics": [],
+      "summary_metrics": {
+        "val_f1": 0.815,
+        "latency_ms": 21.5
+      }
+    },
+    {
+      "run_id": "baseline-seed-8",
+      "variant": "baseline",
+      "seed": 8,
+      "config": {
+        "values": {
+          "lr": 0.001,
+          "optimizer": "adam",
+          "dataset": "imagenet-v1",
+          "code_revision": "a1b2c3d",
+          "augmentation": "none"
+        }
+      },
+      "metrics": [],
+      "summary_metrics": {
+        "val_f1": 0.795,
+        "latency_ms": 20.0
+      }
+    },
+    {
+      "run_id": "candidate-seed-8",
+      "variant": "candidate",
+      "seed": 8,
+      "config": {
+        "values": {
+          "lr": 0.001,
+          "optimizer": "adam",
+          "dataset": "imagenet-v1",
+          "code_revision": "a1b2c3d",
+          "augmentation": "mixup"
+        }
+      },
+      "metrics": [],
+      "summary_metrics": {
+        "val_f1": 0.804,
+        "latency_ms": 22.0
+      }
+    },
+    {
+      "run_id": "baseline-seed-9",
+      "variant": "baseline",
+      "seed": 9,
+      "config": {
+        "values": {
+          "lr": 0.001,
+          "optimizer": "adam",
+          "dataset": "imagenet-v1",
+          "code_revision": "a1b2c3d",
+          "augmentation": "none"
+        }
+      },
+      "metrics": [],
+      "summary_metrics": {
+        "val_f1": 0.802,
+        "latency_ms": 20.0
+      }
+    },
+    {
+      "run_id": "candidate-seed-9",
+      "variant": "candidate",
+      "seed": 9,
+      "config": {
+        "values": {
+          "lr": 0.001,
+          "optimizer": "adam",
+          "dataset": "imagenet-v1",
+          "code_revision": "a1b2c3d",
+          "augmentation": "mixup"
+        }
+      },
+      "metrics": [],
+      "summary_metrics": {
+        "val_f1": 0.813,
+        "latency_ms": 22.5
+      }
+    },
+    {
+      "run_id": "baseline-seed-10",
+      "variant": "baseline",
+      "seed": 10,
+      "config": {
+        "values": {
+          "lr": 0.001,
+          "optimizer": "adam",
+          "dataset": "imagenet-v1",
+          "code_revision": "a1b2c3d",
+          "augmentation": "none"
+        }
+      },
+      "metrics": [],
+      "summary_metrics": {
+        "val_f1": 0.798,
+        "latency_ms": 20.0
+      }
+    },
+    {
+      "run_id": "candidate-seed-10",
+      "variant": "candidate",
+      "seed": 10,
+      "config": {
+        "values": {
+          "lr": 0.001,
+          "optimizer": "adam",
+          "dataset": "imagenet-v1",
+          "code_revision": "a1b2c3d",
+          "augmentation": "mixup"
+        }
+      },
+      "metrics": [],
+      "summary_metrics": {
+        "val_f1": 0.805,
+        "latency_ms": 21.0
+      }
+    }
+  ]
+}
