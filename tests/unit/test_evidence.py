@@ -1,8 +1,19 @@
 import pytest
 
-from runguard.comparison.models import ComparisonResult, MetricDirection
+from runguard.comparison.models import (
+    CheckpointPolicy,
+    ComparisonResult,
+    MetricDirection,
+    ValueSource,
+)
 from runguard.comparison.paired import compare_group
-from runguard.domain.models import ExperimentGroup, Run, RunConfig
+from runguard.domain.models import (
+    ExperimentGroup,
+    MetricPoint,
+    MetricSeries,
+    Run,
+    RunConfig,
+)
 from runguard.statistics.bootstrap import BootstrapError, bootstrap_mean
 from runguard.statistics.evidence import EvidenceError, build_paired_evidence
 from runguard.statistics.models import (
@@ -223,3 +234,73 @@ def test_evidence_contains_no_release_conclusion() -> None:
     fields = set(evidence.model_dump())
 
     assert not fields & {"decision", "severity", "verdict", "status", "finding"}
+
+
+def _history_comparison(policy: CheckpointPolicy) -> ComparisonResult:
+    histories = {
+        "baseline": [(10, 0.50), (20, 0.45), (30, 0.40)],
+        "candidate": [(10, 0.30), (20, 0.35), (30, 0.45)],
+    }
+    runs = [
+        Run(
+            run_id=f"{variant}-{seed}",
+            variant=variant,
+            seed=seed,
+            config=RunConfig(values={}),
+            metrics=[
+                MetricSeries(
+                    name="val_loss",
+                    points=[
+                        MetricPoint(step=step, value=value + 0.01 * seed)
+                        for step, value in points
+                    ],
+                )
+            ],
+        )
+        for variant, points in histories.items()
+        for seed in (1, 2)
+    ]
+    return compare_group(
+        ExperimentGroup(group_id="history-study", runs=runs),
+        "baseline",
+        "candidate",
+        "val_loss",
+        direction=MetricDirection.LOWER_IS_BETTER,
+        value_source=ValueSource.HISTORY,
+        checkpoint_policy=policy,
+    )
+
+
+def test_summary_evidence_states_no_checkpoint_policy() -> None:
+    evidence = build_paired_evidence(_ten_seed_comparison(), random_seed=7)
+
+    assert evidence.checkpoint_policy is None
+    assert any("no checkpoint selection" in item for item in evidence.limitations)
+
+
+def test_history_evidence_preserves_policy_and_selected_steps() -> None:
+    evidence = build_paired_evidence(
+        _history_comparison(CheckpointPolicy.FINAL), random_seed=7, resamples=100
+    )
+
+    assert evidence.value_source is ValueSource.HISTORY
+    assert evidence.checkpoint_policy is CheckpointPolicy.FINAL
+    assert [(p.baseline_step, p.candidate_step) for p in evidence.pairs] == [
+        (30, 30),
+        (30, 30),
+    ]
+    assert any("'final' checkpoint policy" in item for item in evidence.limitations)
+    assert not any("no checkpoint selection" in item for item in evidence.limitations)
+    assert not any("optimistic" in item for item in evidence.limitations)
+
+
+def test_best_checkpoint_evidence_states_optimism_limitation() -> None:
+    evidence = build_paired_evidence(
+        _history_comparison(CheckpointPolicy.BEST), random_seed=7, resamples=100
+    )
+
+    assert [(p.baseline_step, p.candidate_step) for p in evidence.pairs] == [
+        (30, 10),
+        (30, 10),
+    ]
+    assert any("optimistic" in item for item in evidence.limitations)
