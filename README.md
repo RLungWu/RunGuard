@@ -81,7 +81,7 @@ Evidence (direction-aware improvement):
 Mean improvement: +0.010100
 Median improvement: +0.010000
 Mean minus median: +0.000100
-95% percentile bootstrap interval: [+0.009000, +0.011400] (10000 resamples, random seed 7)
+95% percentile bootstrap interval for the mean: [+0.009000, +0.011400] (10000 resamples, random seed 7)
 Effect size (d_z): +4.988 (sample SD 0.002025)
 Largest leave-one-pair-out change: -0.000433 at seed 6 (mean without it +0.009667)
 

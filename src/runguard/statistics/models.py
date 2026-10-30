@@ -15,6 +15,10 @@ class BootstrapMethod(StrEnum):
     PERCENTILE = "percentile"
 
 
+class BootstrapStatistic(StrEnum):
+    MEAN = "mean"
+
+
 class BootstrapConfig(CanonicalModel):
     """Parameters that fully describe one bootstrap calculation."""
 
@@ -22,6 +26,7 @@ class BootstrapConfig(CanonicalModel):
     resamples: int = Field(gt=0)
     random_seed: int
     method: BootstrapMethod = BootstrapMethod.PERCENTILE
+    statistic: BootstrapStatistic = BootstrapStatistic.MEAN
 
 
 class BootstrapInterval(CanonicalModel):
