@@ -9,6 +9,9 @@
   evidence, effect size, bootstrap interval, parameters, and limitations.
 - Explicit insufficient-evidence records for fewer than two pairs and for
   zero-variance effect sizes.
+- Leave-one-pair-out sensitivity evidence with per-pair source runs, signed
+  and absolute mean changes, and the largest-influence seed.
+- Signed mean-minus-median improvement in `PairedEvidence`.
 
 ### Fixed
 
