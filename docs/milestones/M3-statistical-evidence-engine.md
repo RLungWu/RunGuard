@@ -5,9 +5,11 @@
 Active
 
 Implementation has started. The bootstrap reference path, paired effect size,
-positive-pair evidence, and the first structured evidence object are
-implemented. Sensitivity, checkpoint, multi-metric, benchmark, and CLI work
-remain open.
+positive-pair evidence, mean-versus-median evidence, leave-one-pair-out
+sensitivity, and the structured evidence object are implemented. Checkpoint,
+multi-metric, benchmark, and CLI work remain open. Pending trade-offs for the
+remaining work are tracked in the
+[trade-off register](../architecture/tradeoffs-and-tech-choices.md).
 
 ## Goal
 
@@ -354,6 +356,17 @@ The following decisions were agreed during M3 planning:
   comparison aggregates, and rejects empty or duplicate-seed pairs.
 * Bootstrap parameters are validated even when fewer than two pairs make the
   interval insufficient evidence, so invalid configuration is never hidden.
+* Mean-versus-median evidence is the signed `mean_minus_median_improvement`
+  value. No skew threshold or label is applied.
+* Leave-one-pair-out sensitivity is calculated for the mean only.
+  `signed_change` is `leave_one_out_mean - full_mean`; every pair's change is
+  retained with its seed and source run IDs.
+* The largest influence is the greatest absolute change, compared exactly.
+  Exact ties select the smallest seed so the result is independent of input
+  order. Near-ties caused by floating-point rounding are not merged; the
+  per-pair values remain available for later interpretation.
+* Fewer than two pairs produce `fewer-than-two-pairs` insufficient evidence for
+  leave-one-pair-out, because no pair remains after removal.
 
 ## Retrospective
 
