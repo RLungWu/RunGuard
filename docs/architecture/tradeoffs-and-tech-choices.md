@@ -16,7 +16,7 @@
 
 ## 1. 決策紀錄
 
-D1–D10 於 2026-10-30 依建議定案。
+D1–D10 於 2026-10-30 依建議定案。D11 為 CLI 整合時的實作決策，可再調整。
 
 | ID | 主題 | 狀態 | 落實位置 |
 | --- | --- | --- | --- |
@@ -26,10 +26,11 @@ D1–D10 於 2026-10-30 依建議定案。
 | D4 | Incomplete-pair 模式 | 已定案 | M3 規格 Open Questions |
 | D5 | 可容許差異的 config 欄位 | 已定案，已實作 | `comparison/config.py`；benchmark fixtures |
 | D6 | Multi-metric 衝突定義與 CLI | 已定案，API 已實作 | `statistics/multi_metric.py`；CLI 依決議不暴露 |
-| D7 | CLI evidence 輸出格式 | 已定案，待實作 | CLI 整合 slice |
+| D7 | CLI evidence 輸出格式 | 已定案，已實作 | `cli/output.py`、`runguard compare --format` |
 | D8 | Median CI 與 BCa | 已定案 | M3 規格 Open Questions；已知限制 |
 | D9 | 版本號對齊 | 已定案 | `pyproject.toml` |
 | D10 | ADR 編號漂移 | 已定案 | `ROADMAP.md`；ADR-0002／0003 待補寫 |
+| D11 | `compare` 是否預設輸出 evidence | 已實作（可調整） | `cli/main.py` |
 
 ### D1. Checkpoint 值如何進入比較流程
 
@@ -125,7 +126,9 @@ D1–D10 於 2026-10-30 依建議定案。
   schema versioning 是 M4 的範圍。
 - **決議**：B，但在 help 與 README 明確標示 JSON 為 experimental、不承諾相容性，
   直到 M4 加 schema version。
-- **落實**：CLI 整合 slice（M3 最後一個實作 slice）。
+- **落實**：`cli/output.py`。JSON 外層包 `{"format": "runguard.paired-evidence",
+  "stability": "experimental", "evidence": ...}`，讓使用者從資料本身就看得出不穩定；
+  `--help` 與 README 也有標示。
 
 ### D8. Median CI 與 BCa
 
@@ -151,6 +154,21 @@ D1–D10 於 2026-10-30 依建議定案。
 - **決議**：保留實際 ADR-0004；補寫 ADR-0002／0003（內容大致已在 M1 規格與
   AGENTS.md）；ROADMAP 中 M4 之後的 ADR 改為「待編號」，撰寫時再依序取號。
 - **落實**：`ROADMAP.md` 已改為待編號；ADR-0002／0003 尚待補寫。
+
+### D11. `compare` 是否預設輸出 evidence
+
+- **背景**：M2 的 `runguard compare` 只印比較摘要。M3 要讓 CLI 暴露 evidence。
+- **選項**：
+  - A. `compare` 一律計算並輸出 evidence（M2 摘要在前、evidence 在後）。
+  - B. 加 `--evidence` 旗標，預設維持 M2 輸出。
+  - C. 新增 `runguard evidence` 子命令。
+- **Trade-off**：A 讓 M3 的核心產出不會被藏起來，但改變了既有輸出，M2 的精確輸出測試
+  需更新，且每次都跑 10,000 次 bootstrap（10 pairs 約數十毫秒）。B／C 相容性最好，但
+  使用者要知道多一個旗標或命令才看得到 evidence。
+- **決議（實作時採用）**：A。尚未有 stable CLI 承諾，此時改變成本最低。Bootstrap 的
+  `--random-seed` 預設 `0`，並且每次都印在 interval 旁與 JSON 中，維持「明確記錄 seed」
+  的契約；API 層的 `random_seed` 仍是必填參數。
+- **落實**：`cli/main.py`；M2 的摘要行保持原樣，evidence 附加在後。
 
 ---
 

@@ -9,8 +9,10 @@ positive-pair evidence, mean-versus-median evidence, leave-one-pair-out
 sensitivity, summary and final/best checkpoint value selection, multi-metric
 direction-conflict evidence, descriptive configuration differences, and the
 structured evidence objects are implemented in the analysis API. Ten-seed
-benchmark fixtures cover every benchmark scenario. CLI integration and the
-release gate remain open; the CLI does not yet expose any M3 evidence. Pending trade-offs for the
+benchmark fixtures cover every benchmark scenario. `runguard compare` prints
+the evidence as text or experimental JSON and supports checkpoint selection.
+The release gate (README review, retrospective, version, and tag) remains
+open. Pending trade-offs for the
 remaining work are tracked in the
 [trade-off register](../architecture/tradeoffs-and-tech-choices.md).
 
@@ -426,6 +428,12 @@ The following decisions were agreed during M3 planning:
 * The increased-variance scenario is visible only as a large improvement
   standard deviation and an interval spanning zero; per-variant variance
   ratios are not part of M3 evidence.
+* `runguard compare` always builds and prints `PairedEvidence` after the M2
+  summary lines, rather than behind an opt-in flag. The bootstrap random seed
+  defaults to `0` and is printed with the interval and in JSON. (D11)
+* `--format json` wraps the evidence with `format` and `stability:
+  experimental` markers. Multi-metric and configuration-difference evidence
+  remain API-only in M3. (D6, D7)
 
 ## Retrospective
 

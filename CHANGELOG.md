@@ -25,6 +25,9 @@
   compatibility or causal judgment.
 - Ten-seed benchmark fixtures and scenario tests for the M3 evidence
   contract, checked against exact and SciPy reference calculations.
+- `runguard compare` prints statistical evidence after the comparison
+  summary, with `--value-source`, `--checkpoint`, `--random-seed`,
+  `--confidence-level`, `--resamples`, and an experimental `--format json`.
 
 ### Changed
 

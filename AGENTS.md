@@ -21,8 +21,8 @@ leave-one-pair-out sensitivity 與 evidence object，但不能據此認定 M3 �
 | --- | --- | --- |
 | M0 基礎設施 | Python package、CLI、pytest、Ruff、mypy、pre-commit、GitHub Actions CI | `minimal.py` 為早期流程，新能力沿 canonical 路徑開發 |
 | M1 Canonical model | Pydantic v2 strict models、三種本機 JSON 格式、驗證與 round-trip 測試；changelog 有 `0.0.2` 條目 | 不包含遠端來源、schema migration 或 artifact storage |
-| M2 本機配對比較 | seed 配對、metric direction、平均、中位數、positive-pair rate、run provenance；changelog 有 `0.0.3` 條目 | 只讀 summary；CLI 為文字輸出 |
-| M3 統計證據 | bootstrap 參數／結果模型、`bootstrap_mean`、paired `d_z`、positive-pair evidence、mean-vs-median、leave-one-pair-out sensitivity、summary／final／best 選值、multi-metric conflict evidence、config 差異 evidence、`build_paired_evidence`、benchmark 與 SciPy reference 測試 | Checkpoint 選值已在 API（`compare_group` 的 `value_source`／`checkpoint_policy`）；十組 seed benchmark 已完成；尚缺 CLI 整合與 release gate |
+| M2 本機配對比較 | seed 配對、metric direction、平均、中位數、positive-pair rate、run provenance；changelog 有 `0.0.3` 條目 | M2 交付時只讀 summary、文字輸出；M3 已擴充選值與 evidence 輸出 |
+| M3 統計證據 | bootstrap 參數／結果模型、`bootstrap_mean`、paired `d_z`、positive-pair evidence、mean-vs-median、leave-one-pair-out sensitivity、summary／final／best 選值、multi-metric conflict evidence、config 差異 evidence、`build_paired_evidence`、benchmark 與 SciPy reference 測試 | Checkpoint 選值已在 API（`compare_group` 的 `value_source`／`checkpoint_policy`）；十組 seed benchmark 與 CLI evidence 輸出已完成；尚缺 release gate |
 | 後續里程碑 | 規劃記於 `ROADMAP.md` | findings、release policies、W&B／MLflow adapters 尚未實作 |
 
 ## 2. 開工與交付流程
@@ -76,6 +76,7 @@ src/runguard/
   statistics/multi_metric.py primary／secondary metric conflict evidence
   statistics/evidence.py    由 ComparisonResult 建立 PairedEvidence
   cli/main.py               argparse 入口與模組組合
+  cli/output.py             evidence 的文字與 experimental JSON 輸出
 tests/
   unit/                     模組與契約測試
   integration/              compare CLI 端到端測試與 M3 benchmark scenarios
@@ -162,7 +163,9 @@ Seed 配對不代表已驗證 dataset、code revision 與 config 的可比較性
 
 CLI 支援 `--input-format {m0,nested,canonical}`、`--group-id`、兩個 variant、
 metric、`--pair-by seed` 與兩種 direction。文字輸出包含 value source、direction、
-pair 數、raw difference 的平均／中位數與 positive-pair rate；尚無 JSON 輸出。
+pair 數、raw difference 的平均／中位數與 positive-pair rate。M3 起，這些摘要行之後
+會附加 evidence（見第 6 節），並新增 `--value-source`、`--checkpoint`、`--random-seed`、
+`--confidence-level`、`--resamples` 與 experimental `--format json`。
 Checkpoint selection、統計 evidence、incomplete-pair 模式與 release policies 均未包含於 M2。
 
 ## 6. M3 實作契約與待辦
@@ -186,8 +189,9 @@ M3 輸出統計證據及限制，不產生 severity、因果結論或 Pass / War
 不自動刪除 outlier，也不將 influence 數字直接轉成「被單一 seed 主導」的結論。
 主要 benchmark 目標約十組 paired seeds，與 bootstrap resamples 數量分開記錄。
 
-接手順序：依 M3 planned issues 接續 CLI 整合（D7），再處理 README、changelog、
-retrospective 與 `v0.0.4` release gate。修改 benchmark fixtures 時改 generator 再重新產生。
+接手順序：M3 實作 slice 已完成；剩下 release gate：逐項核對 success criteria、
+README 其餘段落、retrospective、`pyproject.toml` 改為 `0.0.4`、changelog 定版，
+merge 後打 `v0.0.4` tag。修改 benchmark fixtures 時改 generator 再重新產生。
 M3 的 Open Questions 已於 2026-10-30 定案（trade-off 紀錄 D4–D8），開工前先查看
 對應條目；新的未決問題記入 trade-off 紀錄，不自行視為已定案。
 
@@ -238,7 +242,7 @@ CI 執行 pytest、Ruff 與 mypy；pre-commit 包含 Ruff lint 與 format。
 | --- | --- |
 | Milestone 狀態 | M1 仍為 Active、M2 為 Completed、M3 為 Active；M1 狀態需對齊實際交付 |
 | 版本 | 已對齊：`pyproject.toml` 與 changelog 皆為 `0.0.3`；M3 發布時同步改為 `0.0.4`（trade-off D9） |
-| README | 架構樹與功能敘述包含規劃；範例的 confidence interval、finding 與建議尚非 CLI 現有輸出 |
+| README | Example 已改為實際 CLI 輸出；架構樹與其他功能敘述仍包含規劃，release gate 時需核對 |
 
 M3 只有在規格的 success criteria、驗證、文件、回顧及 release gate 全部滿足後，
 才可標記完成。

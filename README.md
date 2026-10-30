@@ -57,40 +57,60 @@ A typical RunGuard report should answer:
 
 ```bash
 runguard compare \
-  --input experiments.json \
-  --baseline baseline-v1 \
-  --candidate candidate-v2 \
+  --input tests/fixtures/benchmarks/stable-small-improvement.json \
+  --baseline baseline \
+  --candidate candidate \
   --metric val_f1 \
-  --pair-by seed
+  --pair-by seed \
+  --random-seed 7
 ```
 
-Example output:
+Output (pair list shortened):
 
 ```text
-Comparison: baseline-v1 → candidate-v2
+Comparison: baseline → candidate
 Metric: val_f1
-Paired runs: 5
+Value source: summary
+Direction: higher-is-better
+Paired runs: 10
+Mean paired difference: +0.010100
+Median paired difference: +0.010000
+Positive pairs: 10/10 (100.00%)
 
-Mean paired difference: +0.018
-Median paired difference: +0.006
-Positive pairs: 3/5
-95% bootstrap confidence interval: [-0.004, 0.037]
+Evidence (direction-aware improvement):
+Mean improvement: +0.010100
+Median improvement: +0.010000
+Mean minus median: +0.000100
+95% percentile bootstrap interval: [+0.009000, +0.011400] (10000 resamples, random seed 7)
+Effect size (d_z): +4.988 (sample SD 0.002025)
+Largest leave-one-pair-out change: -0.000433 at seed 6 (mean without it +0.009667)
 
-Finding: Improvement is not seed-stable
-Severity: Warning
-Evidence strength: Moderate
+Pairs:
+- seed 1: baseline-seed-1 → candidate-seed-1: improvement +0.012000
+- seed 2: baseline-seed-2 → candidate-seed-2: improvement +0.009000
+…
+- seed 10: baseline-seed-10 → candidate-seed-10: improvement +0.007000
 
-Supported conclusion:
-The candidate may improve val_f1, but the current evidence is insufficient
-to claim a consistent improvement.
-
-Unsupported conclusion:
-The candidate consistently outperforms the baseline.
-
-Recommended next step:
-Run additional paired seeds using the same dataset, code revision, and
-evaluation configuration.
+Limitations:
+- Seed pairing does not verify dataset, code revision, or configuration comparability between baseline and candidate runs.
+- Percentile bootstrap intervals can be discrete or unstable with few paired observations.
+- Leave-one-pair-out changes are descriptive influence measurements; they do not label outliers or establish that one seed dominates the result.
+- Summary metrics are source-reported values; no checkpoint selection policy was applied.
 ```
+
+The output reports evidence only. Findings, severity, and Pass / Warn / Fail
+release decisions are planned for later milestones and are not produced yet.
+
+Useful options:
+
+* `--direction lower-is-better` for metrics such as loss or latency.
+* `--value-source history --checkpoint {final,best}` to compare a checkpoint
+  from metric history instead of the source-reported summary value.
+* `--random-seed`, `--confidence-level`, and `--resamples` to set the
+  bootstrap parameters; they are always printed with the interval.
+* `--format json` for machine-readable evidence. **The JSON layout is
+  experimental** and may change until finding schema versioning is
+  introduced.
 
 ## Design Principles
 
