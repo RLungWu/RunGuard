@@ -334,9 +334,9 @@ Implement:
 
 ## Planned ADRs
 
-* ADR-0004: Findings are deterministic structured objects.
-* ADR-0005: Raw metrics are preserved without implicit smoothing.
-* ADR-0006: Unsupported claims are represented explicitly.
+* ADR (number assigned when written): Findings are deterministic structured objects.
+* ADR (number assigned when written): Raw metrics are preserved without implicit smoothing.
+* ADR (number assigned when written): Unsupported claims are represented explicitly.
 
 ## Release
 
@@ -442,8 +442,8 @@ Users can analyze real W&B projects without manually exporting run data.
 
 ## Planned ADRs
 
-* ADR-0007: Source adapters must satisfy a common conformance contract.
-* ADR-0008: Normalized snapshots are used for reproducible analysis.
+* ADR (number assigned when written): Source adapters must satisfy a common conformance contract.
+* ADR (number assigned when written): Normalized snapshots are used for reproducible analysis.
 
 ## Release
 

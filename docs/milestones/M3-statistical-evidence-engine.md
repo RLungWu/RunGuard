@@ -279,19 +279,26 @@ observed differences and avoid claiming causality.
 
 ## Open Questions
 
-The following questions do not block the first statistical slice but must be
-resolved before the related features are considered complete:
+The questions below were resolved on 2026-10-30. Options and trade-offs are
+recorded in the
+[trade-off register](../architecture/tradeoffs-and-tech-choices.md).
 
-* Should the incomplete-pair reporting mode be implemented in M3, or remain a
-  later explicit analysis policy while strict mode is the only supported mode?
-* What exact configuration fields are allowed to differ between baseline and
-  candidate before a comparison is considered incompatible?
-* Should multi-metric conflict detection be exposed in the CLI during M3, or
-  remain an analysis API capability until M4's finding and report model?
-* Should median confidence intervals be added after the mean-based reference
-  implementation is validated?
-* Is percentile bootstrap sufficient for the first release, or is BCa required
-  by a concrete benchmark or user scenario?
+* **Incomplete-pair reporting mode in M3?** No. Strict mode is the only M3
+  mode, and it must list every missing seed. A relaxed mode belongs to the M5
+  missing-data policy. (D4)
+* **Which configuration fields may differ?** M3 does not decide
+  compatibility. It reports the differing configuration keys and values as
+  descriptive evidence; allow-lists belong to M5 policies. (D5)
+* **Multi-metric conflict detection in the CLI?** No. M3 exposes it as an
+  analysis API only. `direction_conflict` is defined solely by opposite signs
+  of the primary and secondary mean improvements, with no threshold, and both
+  full `PairedEvidence` objects are retained. Multi-metric CLI output waits
+  for the M4 report model. (D6)
+* **Median confidence intervals?** Not in `v0.0.4`. Mean-versus-median
+  difference and leave-one-pair-out evidence describe robustness. (D8)
+* **Percentile bootstrap or BCa?** Percentile is sufficient for `v0.0.4` and
+  is documented as a known small-sample limitation. BCa is evaluated only if a
+  benchmark shows materially insufficient coverage. (D8)
 
 ## Planned Issues
 
@@ -367,6 +374,17 @@ The following decisions were agreed during M3 planning:
   per-pair values remain available for later interpretation.
 * Fewer than two pairs produce `fewer-than-two-pairs` insufficient evidence for
   leave-one-pair-out, because no pair remains after removal.
+* Checkpoint values are selected in `comparison` by an explicit value-selection
+  step that records value source, policy, and selected step for each run,
+  instead of adding optional step fields to the summary path. ADR-0004 is
+  updated before implementation. (D1)
+* Bootstrap draws resample indices as `floor(random() * n)` from a seeded
+  `random.Random`, relying only on the `random()` sequence that Python keeps
+  stable across versions, rather than on `random.choices`. (D2)
+* Runtime statistics stay on the Python standard library. SciPy may be added as
+  a development-only reference for tests. (D3)
+* The CLI adds evidence output as text by default and `--format json` marked
+  experimental until M4 introduces schema versioning. (D7)
 
 ## Retrospective
 
