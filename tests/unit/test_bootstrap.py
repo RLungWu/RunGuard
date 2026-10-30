@@ -4,7 +4,12 @@ import statistics
 import pytest
 from pydantic import ValidationError
 
-from runguard.statistics.bootstrap import BootstrapError, _percentile, bootstrap_mean
+from runguard.statistics.bootstrap import (
+    BootstrapError,
+    _percentile,
+    _resample_indices,
+    bootstrap_mean,
+)
 from runguard.statistics.models import BootstrapConfig, BootstrapMethod
 
 
@@ -96,9 +101,10 @@ def _reference_interval(
 ) -> tuple[float, float]:
     """Independent reference using the stdlib inclusive quantile method."""
     rng = random.Random(random_seed)
+    n = len(values)
     means = [
-        sum(sample) / len(sample)
-        for sample in (rng.choices(values, k=len(values)) for _ in range(resamples))
+        sum(values[int(rng.random() * n)] for _ in range(n)) / n
+        for _ in range(resamples)
     ]
     tail_cuts = round(2 / (1 - confidence_level))
     cuts = statistics.quantiles(means, n=tail_cuts, method="inclusive")
@@ -150,3 +156,35 @@ def test_bootstrap_mean_preserves_caller_order() -> None:
 
     assert result.lower == pytest.approx(lower, abs=1e-12)
     assert result.upper == pytest.approx(upper, abs=1e-12)
+
+
+def test_resample_indices_follow_pinned_random_stream() -> None:
+    # Pinned golden values: derived only from `random()`, which Python keeps
+    # stable across versions for a given seed. A change here means saved
+    # evidence can no longer be reproduced.
+    rng = random.Random(7)
+
+    assert _resample_indices(rng, 10) == [3, 1, 6, 0, 5, 3, 0, 5, 0, 4]
+    assert _resample_indices(rng, 10) == [0, 0, 4, 8, 1, 2, 6, 9, 5, 3]
+
+
+def test_bootstrap_mean_default_parameters_match_pinned_interval() -> None:
+    # Ten seed-ordered improvements with the default 95%, 10,000-resample
+    # contract. Pinned from the implementation before the D2 index change.
+    improvements = [
+        0.020,
+        0.015,
+        -0.005,
+        0.020,
+        0.0,
+        0.020,
+        -0.005,
+        0.015,
+        0.025,
+        0.010,
+    ]
+
+    result = bootstrap_mean(improvements, random_seed=7)
+
+    assert result.lower == pytest.approx(0.005, abs=1e-12)
+    assert result.upper == pytest.approx(0.0175, abs=1e-12)
