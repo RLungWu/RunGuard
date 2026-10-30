@@ -22,9 +22,9 @@ D1–D10 於 2026-10-30 依建議定案。
 | --- | --- | --- | --- |
 | D1 | Checkpoint 值如何進入比較流程 | 已定案，API 已實作（CLI 待 D7） | ADR-0004、`comparison/selection.py` |
 | D2 | Bootstrap 亂數跨版本可重現性 | 已定案 | `statistics/bootstrap.py` |
-| D3 | 純標準庫 vs NumPy／SciPy | 已定案 | runtime 維持標準庫；SciPy dev-only 待 benchmark slice 加入 |
+| D3 | 純標準庫 vs NumPy／SciPy | 已定案，已實作 | runtime 維持標準庫；NumPy／SciPy 為 dev-only reference（`tests/unit/test_scipy_reference.py`） |
 | D4 | Incomplete-pair 模式 | 已定案 | M3 規格 Open Questions |
-| D5 | 可容許差異的 config 欄位 | 已定案 | M3 規格 Open Questions；benchmark fixtures |
+| D5 | 可容許差異的 config 欄位 | 已定案，已實作 | `comparison/config.py`；benchmark fixtures |
 | D6 | Multi-metric 衝突定義與 CLI | 已定案，API 已實作 | `statistics/multi_metric.py`；CLI 依決議不暴露 |
 | D7 | CLI evidence 輸出格式 | 已定案，待實作 | CLI 整合 slice |
 | D8 | Median CI 與 BCa | 已定案 | M3 規格 Open Questions；已知限制 |
@@ -80,7 +80,10 @@ D1–D10 於 2026-10-30 依建議定案。
 - **決議**：M3 維持 runtime 純標準庫。SciPy 可加入 **dev-only** 依賴，作為
   bootstrap／`d_z` 的獨立 reference（只用於測試，不進 runtime）。效能問題等 M9
   benchmark 有數據再談。
-- **落實**：benchmark fixtures slice 需要獨立 reference 時再加入 dev 依賴。
+- **落實**：`pyproject.toml` 的 dev extra 加入 NumPy／SciPy；`tests/unit/test_scipy_reference.py`
+  以 NumPy 檢查 `d_z`、以 `scipy.stats.bootstrap` 檢查 percentile interval。SciPy 使用不同
+  RNG，容許誤差定為 0.25 個 mean standard error（實測最大約 0.16）。點統計另以
+  `Fraction` 精確 reference 檢查（benchmark tests）。
 
 ### D4. Incomplete-pair 模式是否在 M3 實作
 
@@ -97,8 +100,10 @@ D1–D10 於 2026-10-30 依建議定案。
   treatment、哪些是混淆，本質上是使用者政策。
 - **決議**：M3 只產出**描述性 evidence**（兩邊 config 的差異鍵與值），不判斷相容與否；
   允許清單交給 M5 policy。
-- **落實**：benchmark 的「incompatible／confounded config」情境以「差異被如實列出」
-  作為預期 evidence。
+- **落實**：`comparison/config.py` 的 `compare_run_configs`，使用既有 `ComparisonResult`
+  的 pairs，只比較 top-level `RunConfig.values`，型別敏感（`1`、`1.0`、`True` 視為不同），
+  缺 key 與明確 `None` 分開記錄。benchmark 的 incompatible／confounded 情境以
+  「差異被如實列出、沒有相容或因果欄位」作為預期 evidence。
 
 ### D6. Multi-metric 衝突的定義與 CLI 曝光
 
@@ -161,7 +166,7 @@ D1–D10 於 2026-10-30 依建議定案。
 | Bootstrap | 對 paired improvement 抽樣；mean、95%、percentile、10,000 次、明確 seed；依 seed 順序輸入；index 由 `random()` 推導（D2） | 小樣本 coverage 可能不足（D8） | [M3](../milestones/M3-statistical-evidence-engine.md) |
 | Effect size | Paired Cohen's `d_z`，`n - 1` 標準差；零變異回報 `zero-variance` | 不提供 small／medium／large 標籤 | [M3](../milestones/M3-statistical-evidence-engine.md) |
 | Positive pair | `improvement > 0`，平手不算 | 對極小差異敏感，但定義單純且方向一致 | [ADR-0004](../adr/ADR-0004-comparison-value-semantics.md) |
-| 統計數值依賴 | Runtime 純標準庫（`random`、`statistics`）；SciPy 僅可作 dev-only reference（D3） | 大規模時效能未知 | 本文件 D3 |
+| 統計數值依賴 | Runtime 純標準庫（`random`、`statistics`）；NumPy／SciPy 只作 dev-only reference（D3） | 大規模時效能未知；dev 環境安裝較重 | 本文件 D3 |
 | Evidence 原則 | Evidence 由 pairs 重算、不信任上游 aggregate；只描述不下結論；不足時用 `InsufficientEvidence` 而非數字 | 物件欄位較多 | [M3](../milestones/M3-statistical-evidence-engine.md) |
 | Leave-one-pair-out | 只對 mean 做；`signed_change = loo_mean - full_mean`；最大影響以浮點數完全相等判斷平手，平手取最小 seed；保留每個 pair 的完整數值 | 浮點誤差可能讓「幾乎平手」的兩個 seed 之一被選中；因每個 pair 數值都保留，資訊不會遺失 | [M3](../milestones/M3-statistical-evidence-engine.md) |
 | Mean vs median | 以 `mean_minus_median_improvement`（帶正負號）表達，不設門檻 | 是否「偏態嚴重」留給 policy 層 | [M3](../milestones/M3-statistical-evidence-engine.md) |

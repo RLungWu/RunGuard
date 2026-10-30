@@ -21,6 +21,10 @@
 - Multi-metric evidence combining a primary metric with secondary metrics on
   the same paired runs, with sign-based direction-conflict flags and
   opposing-pair counts, and no severity or release conclusion.
+- Descriptive configuration-difference evidence for compared pairs, with no
+  compatibility or causal judgment.
+- Ten-seed benchmark fixtures and scenario tests for the M3 evidence
+  contract, checked against exact and SciPy reference calculations.
 
 ### Changed
 
