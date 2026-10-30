@@ -1,6 +1,6 @@
 # RunGuard：專案管理與 Agent 工作指南
 
-適用於整個 repository。最近盤點：2026-10-22。
+適用於整個 repository。最近盤點：2026-10-30。
 
 本文件提供開發入口、目前進度與必須遵守的契約。詳細設計與歷史決策留在
 milestone 規格及 ADR；功能或進度改變時，請同步更新本文件。
@@ -13,16 +13,16 @@ RunGuard 比較機器學習實驗的 baseline 與 candidate，透過多個 seed 
 產品方向：資料載入 → canonical model → 可比較性驗證 → seed 配對 → 統計證據
 → findings → policy → Pass / Warn / Fail。此流程尚未全部實作。
 
-**目前焦點：M3 — Statistical Evidence Engine，目標版本 `v0.0.4`。**
-M2 規格標示 Completed；M3 已改為 Active，已有 bootstrap、effect size、
-leave-one-pair-out sensitivity 與 evidence object，但不能據此認定 M3 已完成。
+**目前焦點：M3 — Statistical Evidence Engine，`v0.0.4` release candidate。**
+M2 規格標示 Completed；M3 為 Active（release candidate）：實作 slice 與 success criteria
+已在本機完成並稽核，但須等 CI 通過、merge 到 `main` 並打 `v0.0.4` tag 後才可標為 Completed。
 
 | 階段 | 已有能力 | 邊界與剩餘工作 |
 | --- | --- | --- |
 | M0 基礎設施 | Python package、CLI、pytest、Ruff、mypy、pre-commit、GitHub Actions CI | `minimal.py` 為早期流程，新能力沿 canonical 路徑開發 |
 | M1 Canonical model | Pydantic v2 strict models、三種本機 JSON 格式、驗證與 round-trip 測試；changelog 有 `0.0.2` 條目 | 不包含遠端來源、schema migration 或 artifact storage |
 | M2 本機配對比較 | seed 配對、metric direction、平均、中位數、positive-pair rate、run provenance；changelog 有 `0.0.3` 條目 | M2 交付時只讀 summary、文字輸出；M3 已擴充選值與 evidence 輸出 |
-| M3 統計證據 | bootstrap 參數／結果模型、`bootstrap_mean`、paired `d_z`、positive-pair evidence、mean-vs-median、leave-one-pair-out sensitivity、summary／final／best 選值、multi-metric conflict evidence、config 差異 evidence、`build_paired_evidence`、benchmark 與 SciPy reference 測試 | Checkpoint 選值已在 API（`compare_group` 的 `value_source`／`checkpoint_policy`）；十組 seed benchmark 與 CLI evidence 輸出已完成；尚缺 release gate |
+| M3 統計證據 | bootstrap 參數／結果模型、`bootstrap_mean`、paired `d_z`、positive-pair evidence、mean-vs-median、leave-one-pair-out sensitivity、summary／final／best 選值、multi-metric conflict evidence、config 差異 evidence、`build_paired_evidence`、benchmark 與 SciPy reference 測試 | Checkpoint 選值已在 API（`compare_group` 的 `value_source`／`checkpoint_policy`）；十組 seed benchmark 與 CLI evidence 輸出已完成；release gate 只剩 CI、merge 與 tag |
 | 後續里程碑 | 規劃記於 `ROADMAP.md` | findings、release policies、W&B／MLflow adapters 尚未實作 |
 
 ## 2. 開工與交付流程
@@ -236,13 +236,15 @@ CI 執行 pytest、Ruff 與 mypy；pre-commit 包含 Ruff lint 與 format。
 
 ## 8. 已知落差與管理待辦
 
-以下為 2026-10-22 本機盤點，尚未修復。修改相關區域時重新確認並更新此清單。
+以下為 2026-10-30 本機盤點，尚未修復。修改相關區域時重新確認並更新此清單。
 
 | 項目 | 待處理內容 |
 | --- | --- |
 | Milestone 狀態 | M1 仍為 Active、M2 為 Completed、M3 為 Active；M1 狀態需對齊實際交付 |
-| 版本 | 已對齊：`pyproject.toml` 與 changelog 皆為 `0.0.3`；M3 發布時同步改為 `0.0.4`（trade-off D9） |
-| README | Example 已改為實際 CLI 輸出；架構樹與其他功能敘述仍包含規劃，release gate 時需核對 |
+| 版本 | `pyproject.toml`、`uv.lock` 與 changelog 皆為 `0.0.4`，但 `v0.0.4` tag 尚未建立；merge 後打 tag，若日期不同需同步修改 changelog 日期 |
+| README | 已於 M3 release gate 核對；規劃中的功能已標示 *(planned)*，新增能力時同步更新 Project Status |
+| ADR | ROADMAP 規劃的 ADR-0002／0003 尚未撰寫（trade-off D10） |
+| 根目錄 `main.py` | `uv init` 留下的 hello-world，不屬於 package，可考慮移除 |
 
 M3 只有在規格的 success criteria、驗證、文件、回顧及 release gate 全部滿足後，
 才可標記完成。
