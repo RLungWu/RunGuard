@@ -12,6 +12,12 @@
 - Leave-one-pair-out sensitivity evidence with per-pair source runs, signed
   and absolute mean changes, and the largest-influence seed.
 - Signed mean-minus-median improvement in `PairedEvidence`.
+- Explicit value selection for comparisons: summary by default, or metric
+  history with a `final` or `best` checkpoint policy. Results record the value
+  source and policy, and each pair records the selected steps.
+- Missing history evidence is reported by reason with the affected run IDs.
+- Evidence limitations now describe the value source, including that
+  best-checkpoint selection can be optimistic.
 
 ### Changed
 

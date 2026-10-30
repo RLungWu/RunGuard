@@ -6,8 +6,10 @@ Active
 
 Implementation has started. The bootstrap reference path, paired effect size,
 positive-pair evidence, mean-versus-median evidence, leave-one-pair-out
-sensitivity, and the structured evidence object are implemented. Checkpoint,
-multi-metric, benchmark, and CLI work remain open. Pending trade-offs for the
+sensitivity, summary and final/best checkpoint value selection, and the
+structured evidence object are implemented in the analysis API. Multi-metric,
+benchmark, and CLI work remain open; the CLI does not yet expose checkpoint
+selection. Pending trade-offs for the
 remaining work are tracked in the
 [trade-off register](../architecture/tradeoffs-and-tech-choices.md).
 
@@ -385,6 +387,19 @@ The following decisions were agreed during M3 planning:
   a development-only reference for tests. (D3)
 * The CLI adds evidence output as text by default and `--format json` marked
   experimental until M4 introduces schema versioning. (D7)
+* Value source and checkpoint policy are recorded once on `ComparisonResult`
+  because one comparison applies one policy; each pair records the selected
+  `baseline_step` and `candidate_step`. A result validator rejects history
+  results without a policy or steps and summary results with them.
+* Missing history evidence is reported by reason (`metric-not-found`,
+  `ambiguous-series`, `empty-history`, `missing-value`, `no-valid-value`,
+  `non-finite-value`) with the affected run IDs, and fails the comparison
+  under strict mode.
+* Best-checkpoint selection rejects non-finite values because they cannot be
+  ranked. Final and summary values are not checked for finiteness at
+  selection; non-finite values are rejected later by the statistics layer.
+* Best-checkpoint evidence carries an explicit limitation that the selection
+  can be optimistic compared with a checkpoint fixed in advance.
 
 ## Retrospective
 

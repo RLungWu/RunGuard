@@ -20,7 +20,7 @@ D1–D10 於 2026-10-30 依建議定案。
 
 | ID | 主題 | 狀態 | 落實位置 |
 | --- | --- | --- | --- |
-| D1 | Checkpoint 值如何進入比較流程 | 已定案，待實作 | ADR-0004 更新 + checkpoint selector slice |
+| D1 | Checkpoint 值如何進入比較流程 | 已定案，API 已實作（CLI 待 D7） | ADR-0004、`comparison/selection.py` |
 | D2 | Bootstrap 亂數跨版本可重現性 | 已定案 | `statistics/bootstrap.py` |
 | D3 | 純標準庫 vs NumPy／SciPy | 已定案 | runtime 維持標準庫；SciPy dev-only 待 benchmark slice 加入 |
 | D4 | Incomplete-pair 模式 | 已定案 | M3 規格 Open Questions |
@@ -53,7 +53,8 @@ D1–D10 於 2026-10-30 依建議定案。
   選值邏輯仍是 `comparison` 內的獨立步驟（`comparison/selection.py`），
   result 驗證 step 與 value source 一致。
 - **落實**：[ADR-0004 Value selection](../adr/ADR-0004-comparison-value-semantics.md#value-selection)；
-  checkpoint selector 實作。
+  `comparison/selection.py`、`compare_group(value_source=..., checkpoint_policy=...)`。
+  CLI 尚未暴露，併入 CLI 整合 slice。
 
 ### D2. Bootstrap 亂數的跨版本可重現性
 
