@@ -33,12 +33,12 @@ def bootstrap_mean(
     # a local RNG seeded by `config.random_seed`.
     bootstrap_means: list[float] = []
     rng = random.Random(config.random_seed)
+    sample_size = len(validated_values)
 
     for _ in range(config.resamples):
-        sample = rng.choices(
-            validated_values,
-            k=len(validated_values),
-        )
+        sample = [
+            validated_values[index] for index in _resample_indices(rng, sample_size)
+        ]
         sample_mean = sum(sample) / len(sample)
         bootstrap_means.append(sample_mean)
 
@@ -53,6 +53,15 @@ def bootstrap_mean(
         config=config,
     )
     return interval
+
+
+def _resample_indices(rng: random.Random, size: int) -> list[int]:
+    """Draw `size` indices with replacement from `range(size)`.
+
+    Only `random()` is used because Python keeps its sequence stable across
+    versions for a given seed; `random.choices` carries no such guarantee.
+    """
+    return [math.floor(rng.random() * size) for _ in range(size)]
 
 
 def _validate_values(values: Sequence[float]) -> list[float]:

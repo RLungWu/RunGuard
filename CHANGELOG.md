@@ -13,6 +13,12 @@
   and absolute mean changes, and the largest-influence seed.
 - Signed mean-minus-median improvement in `PairedEvidence`.
 
+### Changed
+
+- Bootstrap resample indices are derived from `random()` only, which Python
+  keeps stable across versions for a given seed, instead of `random.choices`.
+  Results on Python 3.11 are unchanged and pinned by golden tests.
+
 ### Fixed
 
 - Bootstrap intervals now honour the configured confidence level instead of
