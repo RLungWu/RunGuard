@@ -4,9 +4,9 @@ Evidence-based regression testing for machine learning experiments.
 
 RunGuard is a tool for comparing machine learning experiments across multiple runs, seeds, and configurations. It helps teams determine whether a model change represents a real improvement, an unstable result, or a regression that should block release.
 
-RunGuard connects to experiment tracking systems such as Weights & Biases and MLflow, normalizes their run data into a common representation, performs deterministic statistical analysis, and produces findings that are traceable to the original experiment evidence.
+RunGuard is designed to connect to experiment tracking systems such as Weights & Biases and MLflow, normalize their run data into a common representation, perform deterministic statistical analysis, and produce findings that are traceable to the original experiment evidence.
 
-The project is currently in early development.
+The project is in early development. It currently reads local JSON experiment files and reports paired statistical evidence; tracking-system adapters, findings, and release policies are planned. See [Project Status](#project-status).
 
 ## Problem
 
@@ -41,7 +41,7 @@ Policy evaluation
 Pass / Warn / Fail
 ```
 
-A typical RunGuard report should answer:
+When the workflow is complete, a RunGuard report should answer:
 
 1. Are the selected runs comparable?
 2. Are baseline and candidate seeds correctly paired?
@@ -146,7 +146,8 @@ The first stable version focuses on paired multi-seed experiment comparison and 
 
 ## Initial Scope
 
-The first development cycle includes:
+The first development cycle, up to the first stable release, includes the
+items below; [Project Status](#project-status) lists what is delivered.
 
 * a canonical experiment schema;
 * local JSON experiment ingestion;
@@ -178,13 +179,13 @@ RunGuard is not intended to:
 
 ## Architecture
 
-The intended architecture is a modular monolith:
+The intended architecture is a modular monolith ([ADR-0001](docs/adr/ADR-0001-modular-monolith.md)). Items marked *(planned)* are not implemented yet:
 
 ```text
 Sources
 ├── Local JSON
-├── Weights & Biases
-└── MLflow
+├── Weights & Biases (planned)
+└── MLflow (planned)
 
         ↓
 
@@ -197,17 +198,18 @@ Canonical Domain Model
 
         ↓
 
-Comparison Engine
-├── Comparability checks
-├── Seed pairing
+Comparison and Statistical Evidence
+├── Seed pairing and summary / checkpoint value selection
+├── Configuration differences (descriptive)
 ├── Effect size
 ├── Confidence intervals
 ├── Influence analysis
-└── Metric conflict detection
+├── Metric conflict detection
+└── Comparability policies (planned)
 
         ↓
 
-Finding Model
+Finding Model (planned)
 ├── Claim
 ├── Status
 ├── Severity
@@ -219,7 +221,7 @@ Finding Model
 
         ↓
 
-Policy Engine
+Policy Engine (planned)
 ├── Pass
 ├── Warn
 └── Fail
@@ -229,8 +231,8 @@ Policy Engine
 Interfaces
 ├── Python API
 ├── CLI
-├── HTML or Markdown report
-└── CI integration
+├── HTML or Markdown report (planned)
+└── CI integration (planned)
 ```
 
 ## Repository Structure
@@ -238,23 +240,23 @@ Interfaces
 ```text
 runguard/
 ├── src/runguard/
-│   ├── domain/
-│   ├── sources/
-│   ├── comparison/
-│   ├── findings/
-│   ├── policies/
+│   ├── domain/          canonical experiment models
+│   ├── sources/         local JSON adapters
+│   ├── comparison/      seed pairing, value selection, config differences
+│   ├── statistics/      bootstrap, effect size, sensitivity, evidence
+│   ├── findings/        (planned, empty)
+│   ├── policies/        (planned, empty)
 │   └── cli/
 ├── tests/
 │   ├── unit/
-│   ├── integration/
-│   ├── fixtures/
-│   └── golden/
-├── examples/
-├── benchmarks/
+│   ├── integration/     CLI and M3 benchmark scenarios
+│   └── fixtures/        including fixtures/benchmarks/
+├── examples/            (placeholder)
+├── benchmarks/          (placeholder)
 ├── docs/
-│   ├── architecture/
+│   ├── architecture/    trade-off and technical choice register
 │   ├── adr/
-│   └── development/
+│   └── milestones/
 ├── pyproject.toml
 ├── README.md
 ├── ROADMAP.md
@@ -270,7 +272,7 @@ The project will use:
 * Python type annotations;
 * automated formatting and linting;
 * static type checking;
-* unit, integration, and golden tests;
+* unit, integration, and benchmark tests (golden report tests are planned);
 * continuous integration;
 * Conventional Commits;
 * issue-based development;
@@ -286,9 +288,9 @@ The `main` branch should remain installable and testable at all times.
 RunGuard is not yet published. During development:
 
 ```bash
-git clone https://github.com/<username>/runguard.git
-cd runguard
-python -m venv .venv
+git clone https://github.com/RLungWu/RunGuard.git
+cd RunGuard
+python3.11 -m venv .venv
 source .venv/bin/activate
 pip install -e ".[dev]"
 ```
@@ -299,28 +301,36 @@ Run the checks:
 pytest
 ruff check .
 mypy src
+pre-commit run --all-files
 ```
 
 ## Project Status
 
 Current milestone: **M3 — Statistical Evidence Engine**
 
-The immediate target is `v0.0.4`, which will include:
+Delivered so far:
 
-* paired bootstrap confidence intervals;
-* effect size and positive-seed rate;
-* outlier influence and leave-one-pair-out sensitivity analysis;
-* best-checkpoint and final-checkpoint policies;
-* structured evidence objects.
+* `v0.0.2` — canonical experiment model and local JSON adapters;
+* `v0.0.3` — seed-paired comparison with direction-aware differences;
+* `v0.0.4` (release candidate) — paired bootstrap confidence intervals,
+  paired Cohen's `d_z`, positive-pair rate, mean-versus-median and
+  leave-one-pair-out sensitivity, final- and best-checkpoint selection,
+  multi-metric conflict and configuration-difference evidence (Python API),
+  structured evidence objects, and evidence output from `runguard compare`.
+
+Not yet available: W&B and MLflow adapters, findings, Markdown or HTML reports,
+release policies, Pass / Warn / Fail decisions, and CI integration.
+Design trade-offs are tracked in the
+[trade-off register](docs/architecture/tradeoffs-and-tech-choices.md).
 
 See [ROADMAP.md](ROADMAP.md) for the complete development plan.
 
 ## Contributing
 
-The project is not yet ready for external contributions. Contribution guidelines, development setup, and issue templates will be added during M0.
+The project is not yet ready for external contributions. The internal workflow is described in [CONTRIBUTING.md](CONTRIBUTING.md).
 
 Design discussions and implementation decisions should be documented through GitHub issues, pull requests, and Architecture Decision Records.
 
 ## License
 
-License to be selected before the first public release.
+RunGuard is released under the [MIT License](LICENSE).
