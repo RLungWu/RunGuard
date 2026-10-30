@@ -1,9 +1,13 @@
 from enum import StrEnum
-from typing import Literal
 
 from pydantic import Field
 
-from runguard.comparison.models import ComparisonPair, MetricDirection
+from runguard.comparison.models import (
+    CheckpointPolicy,
+    ComparisonPair,
+    MetricDirection,
+    ValueSource,
+)
 from runguard.domain.models import CanonicalModel
 
 
@@ -102,7 +106,8 @@ class PairedEvidence(CanonicalModel):
     candidate_variant: str = Field(min_length=1)
     metric: str = Field(min_length=1)
     direction: MetricDirection
-    value_source: Literal["summary"]
+    value_source: ValueSource
+    checkpoint_policy: CheckpointPolicy | None
     pairs: list[ComparisonPair] = Field(min_length=1)
     sample_size: int = Field(gt=0)
     mean_improvement: float
