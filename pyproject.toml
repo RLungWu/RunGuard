@@ -14,6 +14,9 @@ dev = [
     "ruff>=0.6",
     "mypy>=1.10",
     "pre-commit>=3.7",
+    # Independent statistical reference for tests only; never a runtime import.
+    "numpy>=1.26",
+    "scipy>=1.15",
 ]
 
 [project.scripts]
