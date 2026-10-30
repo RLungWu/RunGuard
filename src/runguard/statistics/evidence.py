@@ -1,6 +1,11 @@
 from statistics import median
 
-from runguard.comparison.models import ComparisonPair, ComparisonResult
+from runguard.comparison.models import (
+    CheckpointPolicy,
+    ComparisonPair,
+    ComparisonResult,
+    ValueSource,
+)
 from runguard.statistics.bootstrap import bootstrap_mean, build_bootstrap_config
 from runguard.statistics.effect_size import paired_cohens_dz
 from runguard.statistics.models import (
@@ -15,12 +20,25 @@ from runguard.statistics.sensitivity import leave_one_pair_out
 BASE_LIMITATIONS = (
     "Seed pairing does not verify dataset, code revision, or configuration "
     "comparability between baseline and candidate runs.",
-    "Summary metrics are source-reported values; no checkpoint selection policy "
-    "was applied.",
     "Percentile bootstrap intervals can be discrete or unstable with few "
     "paired observations.",
     "Leave-one-pair-out changes are descriptive influence measurements; they "
     "do not label outliers or establish that one seed dominates the result.",
+)
+
+
+SUMMARY_LIMITATION = (
+    "Summary metrics are source-reported values; no checkpoint selection policy "
+    "was applied."
+)
+HISTORY_LIMITATION = (
+    "Values were selected from metric history with the '{policy}' checkpoint "
+    "policy; selected steps are recorded per pair and may differ between "
+    "baseline and candidate runs."
+)
+BEST_CHECKPOINT_LIMITATION = (
+    "Best-checkpoint selection takes the most favourable observed step of each "
+    "run and can be optimistic compared with a checkpoint fixed in advance."
 )
 
 
@@ -89,7 +107,7 @@ def build_paired_evidence(
         effect_size=paired_cohens_dz(improvements),
         bootstrap=bootstrap,
         leave_one_pair_out=leave_one_pair_out(pairs),
-        limitations=list(BASE_LIMITATIONS),
+        limitations=[*BASE_LIMITATIONS, *_value_limitations(comparison)],
     )
 
 
@@ -103,3 +121,14 @@ def _ordered_pairs(pairs: list[ComparisonPair]) -> list[ComparisonPair]:
         raise EvidenceError(f"Duplicate paired seeds: {duplicate_seeds}")
 
     return sorted(pairs, key=lambda pair: pair.seed)
+
+
+def _value_limitations(comparison: ComparisonResult) -> list[str]:
+    policy = comparison.checkpoint_policy
+    if comparison.value_source is ValueSource.SUMMARY or policy is None:
+        return [SUMMARY_LIMITATION]
+
+    limitations = [HISTORY_LIMITATION.format(policy=policy.value)]
+    if policy is CheckpointPolicy.BEST:
+        limitations.append(BEST_CHECKPOINT_LIMITATION)
+    return limitations
