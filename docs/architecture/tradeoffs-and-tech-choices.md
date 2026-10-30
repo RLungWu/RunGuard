@@ -47,8 +47,13 @@ D1–D10 於 2026-10-30 依建議定案。
     「統計模組不重做配對」的 M3 context。
 - **決議**：B。checkpoint 是「選值」而非「統計」，放在 `comparison` 符合 ADR-0004；
   schema 改動趁 `v0.0.4` 前（尚無 public schema 承諾）做最便宜。
-- **落實**：寫 code 前先更新 ADR-0004（value selection 章節與 Consequences），
-  再實作 checkpoint selector。
+- **實作細化（2026-10-30）**：同一個 comparison 只套用一種 value source／policy，
+  所以 source 與 policy 記在 `ComparisonResult` 一次；每個 pair 只記
+  `baseline_step`／`candidate_step`，避免在 pair 裡重複存 run ID 與 value。
+  選值邏輯仍是 `comparison` 內的獨立步驟（`comparison/selection.py`），
+  result 驗證 step 與 value source 一致。
+- **落實**：[ADR-0004 Value selection](../adr/ADR-0004-comparison-value-semantics.md#value-selection)；
+  checkpoint selector 實作。
 
 ### D2. Bootstrap 亂數的跨版本可重現性
 
